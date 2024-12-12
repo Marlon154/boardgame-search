@@ -1,94 +1,109 @@
-# Obsidian Sample Plugin
+This is work in progress
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+# Obsidian Board Game Tracker
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+Track and manage your board game collection, play sessions, and statistics directly within Obsidian.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Features
 
-## First time developing plugins?
+### 🎲 Board Game Integration
+- Search and import board games from BoardGameGeek (BGG)
+- Automatically create game entries with detailed metadata
+- Download and save game thumbnails
 
-Quick starting guide for new plugin devs:
+### 📊 Session Tracking
+- Record individual game play sessions
+- Track players, winners, play time, and notes
+- Append session details to game entries
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### 🔍 Search and Discovery
+- Quick search of board games
+- Preview game details before creating entries
+- Keyboard navigation in search results
 
-## Releasing new releases
+### 🛠️ Customizable Settings
+- Configure file location for game entries
+- Customize file name format
+- Control image saving preferences
+- Toggle session tracking features
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+## Installation
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### From Obsidian Plugin Store
+1. Open Obsidian
+2. Go to Settings → Community plugins
+3. Enable Community Plugins
+4. Click "Browse" and search for "Board Game Tracker"
+5. Click "Install"
 
-## Adding your plugin to the community plugin list
+### Manual Installation
+1. Download the latest release from GitHub
+2. Create a folder `your-vault/.obsidian/plugins/board-game-tracker`
+3. Copy `main.js`, `manifest.json`, and `styles.css` into the folder
+4. Restart Obsidian and enable the plugin
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## Usage
 
-## How to use
+### Searching for Games
+- Click the dice icon in the ribbon
+- Type the game name in the search bar
+- Browse and select a game
+- Choose to create a game entry or start a game session
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+### Creating Game Entries
+- Game entries include:
+  - Game title
+  - BGG ID
+  - Player count
+  - Play time
+  - Year published
+  - Rating
+  - Optional thumbnail image
 
-## Manually installing the plugin
+### Recording Game Sessions
+- Track each play session with details like:
+  - Number of players
+  - Winner
+  - Play time
+  - Session notes
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+### Customization
+Customize the plugin in Settings:
+- Set folder for game entries
+- Configure file name format
+- Toggle image saving
+- Enable/disable session tracking features
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+## Commands
 
-## Funding URL
+- `Search BoardGameGeek`: Open BGG search modal
+- `Quick Add Game`: Quickly add a new game entry
+- `Create Game Session`: Start a new game session
 
-You can include funding URLs where people who use your plugin can financially support it.
+## Example Workflow
+1. Click "Search BoardGameGeek"
+2. Search "Catan"
+3. Select the game
+4. Plugin creates a detailed game entry
+5. Record play session details
+6. Session notes are appended to the game entry
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+## Contributing
+- Report issues on GitHub
+- Submit pull requests
+- Share feature requests
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+## Support
+If you find this plugin useful, consider:
+- Leaving a review
+- Contributing to the project
+- Buying me a coffee ☕
 
-If you have multiple URLs, you can also do:
+## License
+MIT License
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+## Acknowledgments
+- Inspired by board game enthusiasts
+- Uses BoardGameGeek XML API 2
+- Built for the Obsidian community
 
-## API Documentation
-
-See https://github.com/obsidianmd/obsidian-api

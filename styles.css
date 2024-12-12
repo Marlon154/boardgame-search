@@ -3,6 +3,54 @@
 This CSS file will be included with your plugin, and
 available in the app when your plugin is enabled.
 
-If your plugin does not need CSS, delete this file.
-
 */
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.search-result-item:hover,
+.search-result-item.is-selected {
+    background-color: #333;
+    color: #fff;
+}
+
+.search-result-thumbnail img {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.search-result-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 12px;
+}
+
+.search-result-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #fff;
+}
+
+.search-result-year {
+    color: #888;
+    font-size: 14px;
+}
+
+.search-result-item:hover .search-result-title,
+.search-result-item.is-selected .search-result-title {
+    color: #fff;
+}
+
+.search-result-item:hover .search-result-year,
+.search-result-item.is-selected .search-result-year {
+    color: #ddd;
+}
+
