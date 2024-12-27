@@ -3,14 +3,18 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, Setting, TFile, reque
 import { BoardGamePluginSettings, DEFAULT_SETTINGS } from './settings/settings';
 import { BoardGameSettingTab } from './settings/SettingTab';
 import { BGGApiManager, BGGGameDetails, BGGSearchResult } from './api/BGGApiManager';
+import { TemplateManager } from './template/TemplateManager';
+import { DEFAULT_TEMPLATE } from './constants';
 
 export default class BoardGamePlugin extends Plugin {
     settings: BoardGamePluginSettings;
     public bggApi: BGGApiManager;
+    private templateManager: TemplateManager;
 
     async onload() {
         await this.loadSettings();
         this.bggApi = new BGGApiManager();
+        this.templateManager = new TemplateManager(this);
 
         // Create the ribbon icon
         const ribbonIconEl = this.addRibbonIcon('dice', 'Board Game Tracker', (evt: MouseEvent) => {
@@ -92,7 +96,6 @@ export default class BoardGamePlugin extends Plugin {
 		    return imageUrl; // Fallback to the original URL
 		}
 	}
-    
 
     async createGameEntry(gameDetails: BGGGameDetails) {
         try {
@@ -102,127 +105,28 @@ export default class BoardGamePlugin extends Plugin {
                 imageReference = await this.downloadAndSaveImage(gameDetails, imageReference);
             }
 
-            // Create note content
+            // Prepare template context
+            const templateContext = {
+                game: {
+                    ...gameDetails,
+                    image: imageReference
+                },
+                useLocalImages: this.settings.enableImageSave,
+                useCharts: this.settings.useChartPlugin,
+                chartWidth: this.settings.chartWidth,
+                date: new Date()
+            };
+
+            // Render template
+            const noteContent = await this.templateManager.loadAndRender(
+                this.settings.templateFile,
+                templateContext
+            );
+
+            // Create note file
             const fileName = gameDetails.name.replace(/[\\/:*?"<>|]/g, '-');
-            const noteContent = `---
-title: ${gameDetails.name}
-bggId: ${gameDetails.id}
-minPlayers: ${gameDetails.minPlayers || 0}
-maxPlayers: ${gameDetails.maxPlayers || 0}
-playTime: ${gameDetails.playingTime || 0}
-year: ${gameDetails.yearPublished || 'Unknown'}
-rating: ${gameDetails.rating?.toFixed(1) || 'N/A'}
-image: ${imageReference}
-lastUpdated: ${new Date().toISOString()}
----
-
-# ${gameDetails.name}
-
-## Overview
-${this.settings.enableImageSave && imageReference 
-    ? `![[${imageReference}]]` 
-    : imageReference 
-        ? `![${gameDetails.name}](${imageReference})`
-        : ''}
-
-## Game Details
-- **Min Players:** ${gameDetails.minPlayers || 'Unknown'}
-- **Max Players:** ${gameDetails.maxPlayers || 'Unknown'}
-- **Play Time:** ${gameDetails.playingTime ? `${gameDetails.playingTime} minutes` : 'Unknown'}
-- **Year Published:** ${gameDetails.yearPublished || 'Unknown'}
-- **BGG Rating:** ${gameDetails.rating ? `${gameDetails.rating.toFixed(1)}/10` : 'N/A'}
-
-## Description
-${gameDetails.description || 'No description available.'}
-
-## Community Polls
-
-### Player Count Information
-${gameDetails.suggestedPlayerCount ? `- ${gameDetails.suggestedPlayerCount.best}
-- ${gameDetails.suggestedPlayerCount.recommended}\n` : ''}
-
-${this.settings.useChartPlugin ? 
-`| Players | ${Object.keys(gameDetails.playerCountPoll[0]?.votes || {}).join(' | ')} |
-|---------|${Object.keys(gameDetails.playerCountPoll[0]?.votes || {}).map(() => '--------').join('|')}|
-${gameDetails.playerCountPoll.map(vote => 
-    `| ${vote.playerCount} | ${Object.values(vote.votes).join(' | ')} |`
-).join('\n')}
-^playerCountTable
-
-\`\`\`chart
-type: bar
-id: playerCountTable
-layout: rows
-width: ${this.settings.chartWidth}
-legend: true
-title: Player Count Votes
-beginAtZero: true
-\`\`\`
-` :
-`| Players | ${Object.keys(gameDetails.playerCountPoll[0]?.votes || {}).join(' | ')} | Total Votes |
-|---------|${Object.keys(gameDetails.playerCountPoll[0]?.votes || {}).map(() => '--------').join('|')}|------------|
-${gameDetails.playerCountPoll.map(vote => 
-    `| ${vote.playerCount} | ${Object.values(vote.votes).join(' | ')} | ${vote.total} |`
-).join('\n')}`}
-
-### Age Recommendation
-Total votes: ${gameDetails.playerAgePoll.totalVotes}
-
-${this.settings.useChartPlugin ? 
-`| Age | Votes |
-|-----|-------|
-${gameDetails.playerAgePoll.results.map(result => 
-    `| ${result.value} | ${result.votes} |`
-).join('\n')}
-^ageTable
-
-\`\`\`chart
-type: bar
-id: ageTable
-layout: rows
-width: ${this.settings.chartWidth}
-legend: false
-beginAtZero: true
-\`\`\`
-` :
-`| Age | Votes |
-|-----|-------|
-${gameDetails.playerAgePoll.results.map(result => 
-    `| ${result.value} | ${result.votes} |`
-).join('\n')}`}
-
-### Language Dependency
-Total votes: ${gameDetails.languageDependencePoll.totalVotes}
-
-${this.settings.useChartPlugin ? 
-`| Level | Votes |
-|-------|-------|
-${gameDetails.languageDependencePoll.results.map(result => 
-    `| ${result.value} | ${result.votes} |`
-).join('\n')}
-^languageTable
-
-\`\`\`chart
-type: bar
-id: languageTable
-layout: rows
-width: ${this.settings.chartWidth}
-legend: false
-beginAtZero: true
-\`\`\`
-` :
-`| Level | Votes |
-|-------|-------|
-${gameDetails.languageDependencePoll.results.map(result => 
-    `| ${result.value} | ${result.votes} |`
-).join('\n')}`}
-
-`;
-
-            // Create the file
-            const normalizedFileName = fileName.replace(/[\\/:*?"<>|]/g, '-');
             const file = await this.app.vault.create(
-                `${this.settings.folder}/${normalizedFileName}.md`,
+                `${this.settings.folder}/${fileName}.md`,
                 noteContent
             );
 
@@ -237,7 +141,7 @@ ${gameDetails.languageDependencePoll.results.map(result =>
             new Notice('Failed to create game entry');
             console.error('Error creating game entry:', error);
         }
-    }
+    }   
 }
 
 class BGGSearchModal extends Modal {
