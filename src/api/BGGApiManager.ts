@@ -1,4 +1,26 @@
 // src/api/BGGApiManager.ts
+
+export interface PollResult {
+    value: string;
+    votes: number;
+}
+
+export interface PlayerCountVote {
+    playerCount: string;
+    votes: { [key: string]: number };
+    total: number;
+}
+
+export interface PlayerAgePoll {
+    results: PollResult[];
+    totalVotes: number;
+}
+
+export interface LanguageDependencePoll {
+    results: PollResult[];
+    totalVotes: number;
+}
+
 export interface BGGSearchResult {
     id: string;
     name: string;
@@ -23,6 +45,13 @@ export interface BGGGameDetails {
     minAge?: number;
     rating?: number;
     weight?: number;
+    playerCountPoll: PlayerCountVote[];
+    suggestedPlayerCount?: {
+        best: string;
+        recommended: string;
+    };
+    playerAgePoll: PlayerAgePoll;
+    languageDependencePoll: LanguageDependencePoll;
 }
 
 export class BGGApiManager {
@@ -83,6 +112,92 @@ export class BGGApiManager {
         }
     }
 
+    private parsePlayerCountPoll(pollEl: Element): PlayerCountVote[] {
+        const results = pollEl.getElementsByTagName('results');
+        const votes: PlayerCountVote[] = [];
+
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i];
+            const playerCount = result.getAttribute('numplayers') || '';
+            const voteResults = result.getElementsByTagName('result');
+            const voteMap: { [key: string]: number } = {};
+            let totalVotes = 0;
+
+            // Parse all vote types dynamically
+            for (let j = 0; j < voteResults.length; j++) {
+                const vote = voteResults[j];
+                const voteType = vote.getAttribute('value') || '';
+                const numVotes = parseInt(vote.getAttribute('numvotes') || '0');
+                voteMap[voteType] = numVotes;
+                totalVotes += numVotes;
+            }
+
+            votes.push({
+                playerCount,
+                votes: voteMap,
+                total: totalVotes
+            });
+        }
+        return votes;
+    }
+
+
+    private parsePlayerAgePoll(pollEl: Element): PlayerAgePoll {
+        const resultsEl = pollEl.getElementsByTagName('results')[0];
+        const results: PollResult[] = [];
+        let totalVotes = 0;
+
+        if (resultsEl) {
+            const voteElements = resultsEl.getElementsByTagName('result');
+            for (let i = 0; i < voteElements.length; i++) {
+                const vote = voteElements[i];
+                const value = vote.getAttribute('value') || '';
+                const numVotes = parseInt(vote.getAttribute('numvotes') || '0');
+                totalVotes += numVotes;
+                
+                if (numVotes > 0) {
+                    results.push({
+                        value,
+                        votes: numVotes
+                    });
+                }
+            }
+        }
+
+        return {
+            results,
+            totalVotes
+        };
+    }
+
+    private parseLanguageDependencePoll(pollEl: Element): LanguageDependencePoll {
+        const resultsEl = pollEl.getElementsByTagName('results')[0];
+        const results: PollResult[] = [];
+        let totalVotes = 0;
+
+        if (resultsEl) {
+            const voteElements = resultsEl.getElementsByTagName('result');
+            for (let i = 0; i < voteElements.length; i++) {
+                const vote = voteElements[i];
+                const value = vote.getAttribute('value') || '';
+                const numVotes = parseInt(vote.getAttribute('numvotes') || '0');
+                totalVotes += numVotes;
+                
+                if (numVotes > 0) {
+                    results.push({
+                        value,
+                        votes: numVotes
+                    });
+                }
+            }
+        }
+
+        return {
+            results,
+            totalVotes
+        };
+    }
+
     async getGameDetails(gameId: string): Promise<BGGGameDetails> {
         try {
             // Add stats=1 to get rating information
@@ -104,8 +219,40 @@ export class BGGApiManager {
             const maxPlayersEl = item.getElementsByTagName('maxplayers')[0];
             const playingTimeEl = item.getElementsByTagName('playingtime')[0];
             const minAgeEl = item.getElementsByTagName('minage')[0];
+            const yearPublishedEl = item.getElementsByTagName('yearpublished')[0];
             const statisticsEl = item.getElementsByTagName('statistics')[0];
             const ratingEl = statisticsEl?.getElementsByTagName('average')[0];
+
+            // Parse polls
+            const polls = item.getElementsByTagName('poll');
+            let playerCountPoll;
+            let playerAgePoll;
+            let languageDependencePoll;
+            let suggestedPlayerCount;
+
+            for (let i = 0; i < polls.length; i++) {
+                const poll = polls[i];
+                const name = poll.getAttribute('name');
+                
+                if (name === 'suggested_numplayers') {
+                    playerCountPoll = this.parsePlayerCountPoll(poll);
+                } else if (name === 'suggested_playerage') {
+                    playerAgePoll = this.parsePlayerAgePoll(poll);
+                } else if (name === 'language_dependence') {
+                    languageDependencePoll = this.parseLanguageDependencePoll(poll);
+                }
+            }
+
+            // Get suggested player count summary
+            const pollSummary = item.getElementsByTagName('poll-summary')[0];
+            if (pollSummary) {
+                const bestWith = pollSummary.querySelector('result[name="bestwith"]')?.getAttribute('value');
+                const recommendedWith = pollSummary.querySelector('result[name="recommmendedwith"]')?.getAttribute('value');
+                suggestedPlayerCount = {
+                    best: bestWith || '',
+                    recommended: recommendedWith || ''
+                };
+            }
             
             // Sanitize HTML entities and format description
             const description = descriptionEl?.textContent || '';
@@ -121,6 +268,7 @@ export class BGGApiManager {
             return {
                 id: gameId,
                 name: nameEl?.getAttribute('value') || '',
+                yearPublished: yearPublishedEl?.getAttribute('value') || undefined,
                 description: sanitizedDescription,
                 image: imageEl?.textContent || '',
                 thumbnail: thumbnailEl?.textContent || '',
@@ -129,6 +277,10 @@ export class BGGApiManager {
                 playingTime: parseInt(playingTimeEl?.getAttribute('value') || '0'),
                 minAge: parseInt(minAgeEl?.getAttribute('value') || '0'),
                 rating: parseFloat(ratingEl?.getAttribute('value') || '0'),
+                playerCountPoll: playerCountPoll || [],
+                suggestedPlayerCount,
+                playerAgePoll: playerAgePoll || { results: [], totalVotes: 0 },
+                languageDependencePoll: languageDependencePoll || { results: [], totalVotes: 0 }
             };
         } catch (error) {
             console.error('Error fetching game details:', error);

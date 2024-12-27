@@ -36,6 +36,10 @@ export interface BoardGamePluginSettings {
   enableScoreTracking: boolean;
   enablePlaytimeTracking: boolean;
   enableWinnerTracking: boolean;
+
+  // Chart settings
+  useChartPlugin: boolean;
+  chartWidth: string;
 }
 
 export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
@@ -68,6 +72,10 @@ export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
   enableScoreTracking: false,
   enablePlaytimeTracking: false,
   enableWinnerTracking: false,
+
+  // Chart settings
+  useChartPlugin: false,
+  chartWidth: '80%',
 };
 
 // Format syntax for the file name format suggester

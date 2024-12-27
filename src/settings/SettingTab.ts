@@ -150,6 +150,32 @@ export class BoardGameSettingTab extends PluginSettingTab {
                         this.plugin.settings.openPageOnCompletion = value;
                         await this.plugin.saveSettings();
                     }));
+
+        // Chart Settings
+        containerEl.createEl('h2', { text: 'Chart Settings' });
+
+        new Setting(containerEl)
+            .setName('Use Charts Plugin')
+            .setDesc('Use the Obsidian Charts plugin to visualize poll data (requires Charts plugin to be installed)')
+            .addToggle(toggle => 
+                toggle.setValue(this.plugin.settings.useChartPlugin)
+                    .onChange(async (value) => {
+                        this.plugin.settings.useChartPlugin = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+        new Setting(containerEl)
+            .setName('Chart Width')
+            .setDesc('Width of generated charts (e.g., 80%, 600px)')
+            .addText(text => 
+                text.setPlaceholder('80%')
+                    .setValue(this.plugin.settings.chartWidth)
+                    .onChange(async (value) => {
+                        this.plugin.settings.chartWidth = value;
+                        await this.plugin.saveSettings();
+                    }))
+            .setDisabled(!this.plugin.settings.useChartPlugin);
+
     }
 
     private renderSessionSettings(containerEl: HTMLElement, isEnabled: boolean) {
