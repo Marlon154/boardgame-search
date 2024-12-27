@@ -42,6 +42,8 @@ export interface BGGGameDetails {
     minPlayers?: number;
     maxPlayers?: number;
     playingTime?: number;
+    minPlayTime?: number;
+    maxPlayTime?: number;   
     minAge?: number;
     rating?: number;
     weight?: number;
@@ -218,6 +220,8 @@ export class BGGApiManager {
             const minPlayersEl = item.getElementsByTagName('minplayers')[0];
             const maxPlayersEl = item.getElementsByTagName('maxplayers')[0];
             const playingTimeEl = item.getElementsByTagName('playingtime')[0];
+            const minPlayingTimeEl = item.getElementsByTagName('minplaytime')[0];
+            const maxPlayingTimeEl = item.getElementsByTagName('maxplaytime')[0];
             const minAgeEl = item.getElementsByTagName('minage')[0];
             const yearPublishedEl = item.getElementsByTagName('yearpublished')[0];
             const statisticsEl = item.getElementsByTagName('statistics')[0];
@@ -275,6 +279,8 @@ export class BGGApiManager {
                 minPlayers: parseInt(minPlayersEl?.getAttribute('value') || '0'),
                 maxPlayers: parseInt(maxPlayersEl?.getAttribute('value') || '0'),
                 playingTime: parseInt(playingTimeEl?.getAttribute('value') || '0'),
+                minPlayTime: parseInt(minPlayingTimeEl?.getAttribute('value') || '0'),
+                maxPlayTime: parseInt(maxPlayingTimeEl?.getAttribute('value') || '0'),
                 minAge: parseInt(minAgeEl?.getAttribute('value') || '0'),
                 rating: parseFloat(ratingEl?.getAttribute('value') || '0'),
                 playerCountPoll: playerCountPoll || [],
