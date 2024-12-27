@@ -45,13 +45,11 @@ lastUpdated: {{ date | date('YYYY-MM-DD') }}
 - {{ game.suggestedPlayerCount.recommended }}
 {% endif %}
 
-| Players | Votes |
-|---------|-------|
-{%- for vote in game.playerCountPoll %}
-{%- for key, value in vote.votes %}
-| {{ vote.playerCount }} {{ key }} | {{ value }} |
-{%- endfor %}
-{%- endfor %}
+| Players | Best | Recommended | Not Recommended |
+|---------|------|-------------|-----------------|
+{% for vote in game.playerCountPoll -%}
+| {{ vote.playerCount }} | {{ vote.votes['Best'] | default(0) }} | {{ vote.votes['Recommended'] | default(0) }} | {{ vote.votes['Not Recommended'] | default(0) }} |
+{% endfor %}
 {% if useCharts %}
 ^playerCountTable
 
@@ -88,7 +86,7 @@ type: bar
 id: ageTable
 layout: rows
 width: {{ chartWidth }}
-legend: false
+legend: true
 beginAtZero: true
 \`\`\`
 {% else %}
@@ -115,7 +113,7 @@ type: bar
 id: languageTable
 layout: rows
 width: {{ chartWidth }}
-legend: false
+legend: true
 beginAtZero: true
 \`\`\`
 {% else %}

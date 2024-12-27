@@ -29,8 +29,8 @@ jobs:
       
       - name: Package files
         run: |
-          zip release.zip main.js manifest.json styles.css
-          tar -czf release.tar.gz main.js manifest.json styles.css
+          zip obsidian-boardgame-plugin.zip main.js manifest.json styles.css
+          tar -czf obsidian-boardgame-plugin.tar.gz main.js manifest.json styles.css
       
       - name: Create Release
         env:
@@ -44,5 +44,5 @@ jobs:
             --title "Release $TAG_NAME" \
             --draft=false \
             --prerelease=false \
-            release.zip release.tar.gz main.js manifest.json styles.css \
+            obsidian-boardgame-plugin.zip obsidian-boardgame-plugin.tar.gz main.js manifest.json styles.css \
             --generate-notes

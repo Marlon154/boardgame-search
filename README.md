@@ -4,43 +4,42 @@ This is work in progress
 
 Track and manage your board game collection, play sessions, and statistics directly within Obsidian.
 
+<img src="https://raw.githubusercontent.com/Marlon154/obsidian-boardgame-plugin/main/docs/search-screenshot.png" alt="A screenshot show the search for boardgames.">
+
 ## Features
 
 ### 🎲 Board Game Integration
-- Search and import board games from BoardGameGeek (BGG)
+- Search and import board games from [BoardGameGeek](https://boardgamegeek.com/) (BGG)
 - Automatically create game entries with detailed metadata
 - Download and save game thumbnails
 
 ### 📊 Session Tracking
-- Record individual game play sessions
-- Track players, winners, play time, and notes
-- Append session details to game entries
-
-### 🔍 Search and Discovery
-- Quick search of board games
-- Preview game details before creating entries
-- Keyboard navigation in search results
+Work in progress
+~~- Record individual game play sessions~~
+~~- Track players, winners, play time, and notes~~
+~~- Append session details to game entries~~
 
 ### 🛠️ Customizable Settings
 - Configure file location for game entries
 - Customize file name format
 - Control image saving preferences
-- Toggle session tracking features
+~~- Toggle session tracking features~~
 
 ## Installation
 
 ### From Obsidian Plugin Store
-1. Open Obsidian
-2. Go to Settings → Community plugins
-3. Enable Community Plugins
-4. Click "Browse" and search for "Board Game Tracker"
-5. Click "Install"
+Work in progress
+~~1. Open Obsidian~~
+~~2. Go to Settings → Community plugins~~
+~~3. Enable Community Plugins~~
+~~4. Click "Browse" and search for "Boardgame Search"~~
+~~5. Click "Install"~~
 
 ### Manual Installation
 1. Download the latest release from GitHub
-2. Create a folder `your-vault/.obsidian/plugins/board-game-tracker`
-3. Copy `main.js`, `manifest.json`, and `styles.css` into the folder
-4. Restart Obsidian and enable the plugin
+2. Create a folder `your-vault/.obsidian/plugins/obsidian-boardgame-plugin`
+3. Copy `main.js`, `manifest.json`, and `styles.css` into the folder or just extract and move the zip 
+4. Enable the plugin in Obsidian
 
 ## Usage
 
@@ -49,6 +48,7 @@ Track and manage your board game collection, play sessions, and statistics direc
 - Type the game name in the search bar
 - Browse and select a game
 - Choose to create a game entry or start a game session
+or use the command `Search BoardGameGeek`
 
 ### Creating Game Entries
 - Game entries include:
@@ -60,50 +60,114 @@ Track and manage your board game collection, play sessions, and statistics direc
   - Rating
   - Optional thumbnail image
 
-### Recording Game Sessions
-- Track each play session with details like:
-  - Number of players
-  - Winner
-  - Play time
-  - Session notes
-
-### Customization
-Customize the plugin in Settings:
-- Set folder for game entries
-- Configure file name format
-- Toggle image saving
-- Enable/disable session tracking features
-
-## Commands
-
-- `Search BoardGameGeek`: Open BGG search modal
-- `Quick Add Game`: Quickly add a new game entry
-- `Create Game Session`: Start a new game session
-
 ## Example Workflow
 1. Click "Search BoardGameGeek"
 2. Search "Catan"
 3. Select the game
 4. Plugin creates a detailed game entry
-5. Record play session details
-6. Session notes are appended to the game entry
+
+### 📈 Statistics and Visualization
+- Support for [Obsidian Charts plugin](https://github.com/phibr0/obsidian-charts)
+- Visualize player count data
+- Age recommendation statistics
+- Language dependency information
+
+
+## Templating
+
+The plugin uses Nunjucks templating for customizable game entries. Access available template data using the Data Explorer command in Obsidian.
+
+### Available Template Variables
+
+```markdown
+game:
+  name: string
+  id: string
+  minPlayers: number
+  maxPlayers: number
+  playTime: number
+  yearPublished: string
+  rating: number
+  image: string
+  description: string
+  suggestedPlayerCount:
+    best: string
+    recommended: string
+  playerCountPoll: Array
+  playerAgePoll: object
+  languageDependencePoll: object
+
+useCharts: boolean
+chartWidth: string
+useLocalImages: boolean
+date: Date
+```
+
+### Example Template
+
+```markdown
+## {{game.name}}
+
+### Overview
+{% if game.image %}
+{% if useLocalImages %}
+![[{{ game.image }}]]
+{% else %}
+![{{ game.name }}]({{ game.image }})
+{% endif %}
+{% endif %}
+
+### Game Details
+- **Min Players:** {{ game.minPlayers | default('Unknown') }}
+- **Max Players:** {{ game.maxPlayers | default('Unknown') }}
+- **Play Time:** {{ game.playingTime | default('Unknown') }}{% if game.playingTime %} minutes{% endif %}
+- **Year Published:** {{ game.yearPublished | default('Unknown') }}
+- **BGG Rating:** {{ game.rating | number(1) | default('N/A') }}{% if game.rating %}/10{% endif %}
+
+### Notes
+{% persist "notes" %}
+Add your personal notes here - this section won't be overwritten on reimport
+{% endpersist %}
+```
+
+### Persistent Sections
+
+Use the `persist` tag to create sections that won't be overwritten on reimport:
+
+```markdown
+{% persist "section-name" %}
+Your persistent content here
+{% endpersist %}
+```
+
+### Charts Support
+
+If you have the Obsidian Charts plugin installed, enable chart support in settings to visualize data:
+
+```markdown
+{% if useCharts %}
+^playerCountData
+
+\`\`\`chart
+type: bar
+id: playerCountData
+layout: rows
+width: {{ chartWidth }}
+legend: true
+title: Player Count Votes
+beginAtZero: true
+\`\`\`
+{% endif %}
+```
+
+## Support
+If you find this plugin useful, please consider a donation.
 
 ## Contributing
 - Report issues on GitHub
 - Submit pull requests
-- Share feature requests
-
-## Support
-If you find this plugin useful, consider:
-- Leaving a review
-- Contributing to the project
-- Buying me a coffee ☕
-
-## License
-MIT License
 
 ## Acknowledgments
 - Inspired by board game enthusiasts
-- Uses BoardGameGeek XML API 2
+- Uses [BoardGameGeek XML API 2](https://boardgamegeek.com/wiki/page/BGG_XML_API2#)
 - Built for the Obsidian community
-
