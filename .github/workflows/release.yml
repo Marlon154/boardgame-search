@@ -14,19 +14,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
+      
       - name: Install dependencies
         run: npm ci
-
+      
       - name: Build project
         run: npm run build
-
+      
+      - name: Package files
+        run: |
+          zip release.zip main.js manifest.json styles.css
+          tar -czf release.tar.gz main.js manifest.json styles.css
+      
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -34,10 +39,10 @@ jobs:
           # Get tag name
           TAG_NAME=${GITHUB_REF#refs/tags/}
           
-          # Create release
+          # Create release with archives and individual files
           gh release create "$TAG_NAME" \
             --title "Release $TAG_NAME" \
             --draft=false \
             --prerelease=false \
-            main.js manifest.json styles.css \
+            release.zip release.tar.gz main.js manifest.json styles.css \
             --generate-notes
