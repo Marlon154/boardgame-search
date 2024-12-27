@@ -24,18 +24,19 @@ export interface BoardGamePluginSettings {
   // General settings
   openPageOnCompletion: boolean;
   lastPlayedGame: string;
-  
+  overwriteExistingNote: boolean;
+
   // BGG Integration settings
   enableBGGIntegration: boolean;
   bggUsername: string;
   syncWithBGG: boolean;
 
   // Session tracking
-  enableSessionTracking: boolean;
-  enablePlayerTracking: boolean;
-  enableScoreTracking: boolean;
-  enablePlaytimeTracking: boolean;
-  enableWinnerTracking: boolean;
+  // enableSessionTracking: boolean;
+  // enablePlayerTracking: boolean;
+  // enableScoreTracking: boolean;
+  // enablePlaytimeTracking: boolean;
+  // enableWinnerTracking: boolean;
 
   // Chart settings
   useChartPlugin: boolean;
@@ -60,18 +61,19 @@ export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
   // General settings
   openPageOnCompletion: true,
   lastPlayedGame: '',
+  overwriteExistingNote: false,
   
   // BGG Integration
-  enableBGGIntegration: false,
+  enableBGGIntegration: true,
   bggUsername: '',
   syncWithBGG: false,
 
   // Session tracking - disabled by default
-  enableSessionTracking: false,
-  enablePlayerTracking: false,
-  enableScoreTracking: false,
-  enablePlaytimeTracking: false,
-  enableWinnerTracking: false,
+  // enableSessionTracking: false,
+  // enablePlayerTracking: false,
+  // enableScoreTracking: false,
+  // enablePlaytimeTracking: false,
+  // enableWinnerTracking: false,
 
   // Chart settings
   useChartPlugin: false,

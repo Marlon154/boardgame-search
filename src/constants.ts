@@ -5,7 +5,7 @@ export enum DefaultFrontmatterKeyType {
 
 
 export const DEFAULT_TEMPLATE = `---
-title: {{ game.name }}
+title: "{{ game.name }}"
 bggId: {{ game.id }}
 minPlayers: {{ game.minPlayers | default(0) }}
 maxPlayers: {{ game.maxPlayers | default(0) }}
@@ -62,12 +62,6 @@ legend: true
 title: Player Count Votes
 beginAtZero: true
 \`\`\`
-{% else %}
-| Players | {% for key in game.playerCountPoll[0].votes | dictsort %}{{ key[0] }} | {% endfor %}Total Votes |
-|---------|{% for key in game.playerCountPoll[0].votes | dictsort %}---------|{% endfor %}------------|
-{% for vote in game.playerCountPoll -%}
-| {{ vote.playerCount }} | {% for key, value in vote.votes | dictsort %}{{ value }} | {% endfor %}{{ vote.total }} |
-{% endfor %}
 {% endif %}
 
 ### Age Recommendation
@@ -89,12 +83,6 @@ width: {{ chartWidth }}
 legend: true
 beginAtZero: true
 \`\`\`
-{% else %}
-| Age | Votes |
-|-----|-------|
-{% for result in game.playerAgePoll.results -%}
-| {{ result.value }} | {{ result.votes }} |
-{% endfor %}
 {% endif %}
 
 ### Language Dependency
@@ -116,10 +104,4 @@ width: {{ chartWidth }}
 legend: true
 beginAtZero: true
 \`\`\`
-{% else %}
-| Level | Votes |
-|-------|-------|
-{% for result in game.languageDependencePoll.results -%}
-| {{ result.value }} | {{ result.votes }} |
-{% endfor %}
 {% endif %}`;
