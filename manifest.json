@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-boardgame-plugin",
+	"id": "boardgame-search",
 	"name": "Boardgame Search",
 	"version": "0.3.0",
 	"minAppVersion": "0.15.0",
 	"description": "An Obsidian plugin that helps board game enthusiasts track their game collection seamlessly within their notes.",
 	"author": "Marlon May",
-	"authorUrl": "https://github.com/Marlon154/obsidian-boardgame-plugin",
+	"authorUrl": "https://github.com/Marlon154",
 	"fundingUrl": "https://ko-fi.com/maymar",
 	"isDesktopOnly": false
 }
