@@ -23,8 +23,8 @@ export default class BoardGamePlugin extends Plugin {
         ribbonIconEl.addClass('boardgame-plugin-ribbon-class');
 
         // Add status bar item
-        const statusBarItemEl = this.addStatusBarItem();
-        statusBarItemEl.setText('🎲 Ready to track games');
+        // const statusBarItemEl = this.addStatusBarItem();
+        // statusBarItemEl.setText('🎲 Ready to track games');
 
         // Add command to search BGG
         this.addCommand({
