@@ -129,26 +129,30 @@ export default class BoardGamePlugin extends Plugin {
                 ? `${this.settings.folder}/${fileName}.md`
                 : `${fileName}.md`);
 
-            // Check if file exists and handle accordingly
-            let file = this.app.vault.getAbstractFileByPath(filePath);
+            let createdFile: TFile;
+            const existingFile = this.app.vault.getAbstractFileByPath(filePath);
     
-            if (file instanceof TFile) {
+            if (existingFile instanceof TFile) {
                 if (this.settings.overwriteExistingNote) {
-                    await this.app.vault.modify(file, noteContent);
+                    await this.app.vault.modify(existingFile, noteContent);
+                    createdFile = existingFile;
                     new Notice('Game entry updated!');
                 } else {
                     new Notice('Game already exists - not updated.');
+                    createdFile = existingFile;
                 }
             } else {
                 // Ensure folder exists
-                await this.app.vault.adapter.mkdir(this.settings.folder);
-                file = await this.app.vault.create(filePath, noteContent);
+                if (this.settings.folder) {
+                    await this.app.vault.adapter.mkdir(this.settings.folder);
+                }
+                createdFile = await this.app.vault.create(filePath, noteContent);
                 new Notice('Game entry created!');
             }
     
-            if (this.settings.openPageOnCompletion && file) {
+            if (this.settings.openPageOnCompletion && createdFile instanceof TFile) {
                 const leaf = this.app.workspace.getLeaf(false);
-                await leaf.openFile(file);
+                await leaf.openFile(createdFile);
             }
         } catch (error) {
             new Notice('Failed to create/update game entry');
