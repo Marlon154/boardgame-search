@@ -130,9 +130,9 @@ export default class BoardGamePlugin extends Plugin {
                 : `${fileName}.md`);
 
             // Check if file exists and handle accordingly
-            let file = this.app.vault.getAbstractFileByPath(filePath) as TFile;
+            let file = this.app.vault.getAbstractFileByPath(filePath);
     
-            if (file) {
+            if (file instanceof TFile) {
                 if (this.settings.overwriteExistingNote) {
                     await this.app.vault.modify(file, noteContent);
                     new Notice('Game entry updated!');
