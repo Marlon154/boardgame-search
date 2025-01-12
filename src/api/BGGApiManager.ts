@@ -1,4 +1,5 @@
 // src/api/BGGApiManager.ts
+import { requestUrl, normalizePath } from 'obsidian';
 
 export interface PollResult {
     value: string;
@@ -63,14 +64,17 @@ export class BGGApiManager {
 
     async searchGames(query: string): Promise<BGGSearchResult[]> {
         try {
-            const response = await fetch(`${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame`);
-            if (!response.ok) {
+            const response = await requestUrl({
+                url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame`,
+                method: 'GET'
+            });
+            
+            if (response.status !== 200) {
                 throw new Error('Network response was not ok');
             }
             
-            const xmlText = await response.text();
             const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+            const xmlDoc = parser.parseFromString(response.text, 'text/xml');
             
             const items = xmlDoc.getElementsByTagName('item');
             const results: BGGSearchResult[] = [];
@@ -200,17 +204,33 @@ export class BGGApiManager {
         };
     }
 
+    private sanitizeText(text: string): string {
+        return text
+            .replace(/&#10;/g, '\n')     // Newlines
+            .replace(/&mdash;/g, '—')     // Em dash
+            .replace(/&ndash;/g, '–')     // En dash
+            .replace(/&quot;/g, '"')      // Quotes
+            .replace(/&amp;/g, '&')       // Ampersand
+            .replace(/&lt;/g, '<')        // Less than
+            .replace(/&gt;/g, '>')        // Greater than
+            .replace(/&nbsp;/g, ' ')      // Non-breaking space
+            .replace(/\n\s+\n/g, '\n\n')  // Remove extra spacing between paragraphs
+            .trim();
+    }
+
     async getGameDetails(gameId: string): Promise<BGGGameDetails> {
         try {
-            // Add stats=1 to get rating information
-            const response = await fetch(`${this.baseUrl}/thing?id=${gameId}&stats=1`);
-            if (!response.ok) {
+            const response = await requestUrl({
+                url: `${this.baseUrl}/thing?id=${gameId}&stats=1`,  // Include stats for rating and polls
+                method: 'GET'
+            });
+            
+            if (response.status !== 200) {
                 throw new Error('Network response was not ok');
             }
             
-            const xmlText = await response.text();
             const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+            const xmlDoc = parser.parseFromString(response.text, 'text/xml');
             
             const item = xmlDoc.getElementsByTagName('item')[0];
             const nameEl = item.getElementsByTagName('name')[0];
@@ -257,23 +277,12 @@ export class BGGApiManager {
                     recommended: recommendedWith || ''
                 };
             }
-            
-            // Sanitize HTML entities and format description
-            const description = descriptionEl?.textContent || '';
-            const sanitizedDescription = description
-                .replace(/&#10;/g, '\n')
-                .replace(/&quot;/g, '"')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/\n\s+\n/g, '\n\n')
-                .trim();
 
             return {
                 id: gameId,
-                name: nameEl?.getAttribute('value') || '',
+                name: this.sanitizeText(nameEl?.getAttribute('value') || ''),
                 yearPublished: yearPublishedEl?.getAttribute('value') || undefined,
-                description: sanitizedDescription,
+                description: this.sanitizeText(descriptionEl?.textContent || ''),
                 image: imageEl?.textContent || '',
                 thumbnail: thumbnailEl?.textContent || '',
                 minPlayers: parseInt(minPlayersEl?.getAttribute('value') || '0'),

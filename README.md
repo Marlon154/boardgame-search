@@ -1,6 +1,6 @@
 This is work in progress
 
-# Obsidian Board Game Tracker
+# Board Game Search
 
 Track and manage your board game collection, play sessions, and statistics directly within Obsidian.
 
@@ -161,13 +161,20 @@ beginAtZero: true
 ```
 
 ## Support
+
 If you find this plugin useful, please consider a donation.
 
 ## Contributing
+
 - Report issues on GitHub
 - Submit pull requests
 
-## Acknowledgments
-- Inspired by board game enthusiasts
-- Uses [BoardGameGeek XML API 2](https://boardgamegeek.com/wiki/page/BGG_XML_API2#)
-- Built for the Obsidian community
+## Credits
+
+This plugin uses the BoardGameGeek XML API 2 to fetch game data. All game information is provided by BoardGameGeek.
+
+[![Powered by BoardGameGeek](https://cf.geekdo-images.com/HZy35cmzmmyV9BarSuk6ug__imagepage/img/FOGhR5OgYhcg-1jdqT5i5W8Xfbg=/fit-in/900x600/filters:no_upscale():strip_icc()/pic7779581.png)](https://boardgamegeek.com)
+
+All game data is property of BoardGameGeek and its users. Usage of this plugin is subject to BoardGameGeek's [Terms of Service](https://boardgamegeek.com/terms) and XML API Terms of Use.
+
+Built for the Obsidian community.

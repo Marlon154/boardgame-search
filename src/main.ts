@@ -4,7 +4,7 @@ import { BoardGamePluginSettings, DEFAULT_SETTINGS } from './settings/settings';
 import { BoardGameSettingTab } from './settings/SettingTab';
 import { BGGApiManager, BGGGameDetails, BGGSearchResult } from './api/BGGApiManager';
 import { TemplateManager } from './template/TemplateManager';
-import { DEFAULT_TEMPLATE } from './constants';
+import { DEFAULT_TEMPLATE, BGGLOGOIMGAEURL } from './constants';
 
 export default class BoardGamePlugin extends Plugin {
     settings: BoardGamePluginSettings;
@@ -82,13 +82,20 @@ export default class BoardGamePlugin extends Plugin {
 		    // Generate file name and path
 		    const gameId = game.id || 'unknown';
 		    const fileName = `bgg-${gameId}.jpg`;
-		    const filePath = `${this.settings.imagePath}/${fileName}`;
+            const folderPath = normalizePath(this.settings.imagePath);
+            const filePath = normalizePath(`${folderPath}/${fileName}`);
 
-		    // Ensure the directory exists
-		    await this.app.vault.adapter.mkdir(this.settings.imagePath);
+            const folder = this.app.vault.getAbstractFileByPath(folderPath);
+            if (!folder) {
+                await this.app.vault.createFolder(folderPath);
+            }
 
-		    // Save the image to the specified path
-		    await this.app.vault.adapter.writeBinary(filePath, imageData);
+            const file = this.app.vault.getAbstractFileByPath(filePath);
+            if (file instanceof TFile) {
+                await this.app.vault.modifyBinary(file, imageData);
+            } else {
+                await this.app.vault.createBinary(filePath, imageData);
+            }
 
 		    return filePath;
 		} catch (error) {
@@ -125,34 +132,34 @@ export default class BoardGamePlugin extends Plugin {
 
             // Generate file path
             const fileName = gameDetails.name.replace(/[\\/:*?"<>|]/g, '-');
-            const filePath = normalizePath(this.settings.folder 
-                ? `${this.settings.folder}/${fileName}.md`
-                : `${fileName}.md`);
+            const folderPath = this.settings.folder ? normalizePath(this.settings.folder) : '';
+            const filePath = normalizePath(folderPath ? `${folderPath}/${fileName}.md` : `${fileName}.md`);
 
             let createdFile: TFile;
             const existingFile = this.app.vault.getAbstractFileByPath(filePath);
     
             if (existingFile instanceof TFile) {
                 if (this.settings.overwriteExistingNote) {
-                    await this.app.vault.modify(existingFile, noteContent);
+                    await this.app.vault.process(existingFile, (data) => noteContent);
                     createdFile = existingFile;
-                    new Notice('Game entry updated!');
+                    new Notice('Game entry updated');
                 } else {
-                    new Notice('Game already exists - not updated.');
+                    new Notice('Game already exists - not updated');
                     createdFile = existingFile;
                 }
             } else {
-                // Ensure folder exists
-                if (this.settings.folder) {
-                    await this.app.vault.adapter.mkdir(this.settings.folder);
+                if (folderPath) {
+                    const folder = this.app.vault.getAbstractFileByPath(folderPath);
+                    if (!folder) {
+                        await this.app.vault.createFolder(folderPath);
+                    }
                 }
                 createdFile = await this.app.vault.create(filePath, noteContent);
-                new Notice('Game entry created!');
+                new Notice('Game entry created');
             }
     
             if (this.settings.openPageOnCompletion && createdFile instanceof TFile) {
-                const leaf = this.app.workspace.getLeaf(false);
-                await leaf.openFile(createdFile);
+                await this.app.workspace.getLeaf(false).openFile(createdFile);
             }
         } catch (error) {
             new Notice('Failed to create/update game entry');
@@ -164,6 +171,7 @@ export default class BoardGamePlugin extends Plugin {
 class BGGSearchModal extends Modal {
     private plugin: BoardGamePlugin;
     private searchResults: BGGSearchResult[] = [];
+    private searchTimeout: number;
 
     constructor(plugin: BoardGamePlugin) {
         super(plugin.app);
@@ -174,8 +182,8 @@ class BGGSearchModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
         contentEl.addClass('bgg-search-modal');
-
-        // Create search input
+    
+        // Search input
         const searchContainer = contentEl.createDiv('search-container');
         const searchInput = searchContainer.createEl('input', {
             type: 'text',
@@ -183,24 +191,41 @@ class BGGSearchModal extends Modal {
             cls: 'search-input'
         });
         searchInput.focus();
-
-        // Create loading indicator
+    
+        // Loading indicator
         const loadingEl = searchContainer.createDiv('search-loading');
         loadingEl.setText('Searching...');
         loadingEl.hide();
-
-        // Create results container
+    
+        // Results container
         const resultsContainer = contentEl.createDiv('search-results');
-
-        // Create no results message
+    
+        // No results message
         const noResultsEl = resultsContainer.createDiv('no-results');
         noResultsEl.setText('No games found');
         noResultsEl.hide();
-
-        // Handle search input
-        let debounceTimeout: NodeJS.Timeout;
+    
+        // BGG Attribution at the bottom
+        const attributionEl = contentEl.createDiv('bgg-attribution');
+        const linkEl = attributionEl.createEl('a', {
+            href: 'https://boardgamegeek.com',
+            cls: 'bgg-attribution-link',
+            attr: {
+                target: '_blank',
+                rel: 'noopener'
+            }
+        });
+        linkEl.createEl('img', {
+            cls: 'bgg-logo',
+            attr: {
+                src: BGGLOGOIMGAEURL,
+                alt: 'Powered by BoardGameGeek'
+            }
+        });
+        
+        // Handle search input with window.setTimeout
         searchInput.addEventListener('input', () => {
-            clearTimeout(debounceTimeout);
+            window.clearTimeout(this.searchTimeout);
             
             // Clear results if input is empty
             if (searchInput.value.trim().length === 0) {
@@ -209,7 +234,7 @@ class BGGSearchModal extends Modal {
                 return;
             }
 
-            debounceTimeout = setTimeout(async () => {
+            this.searchTimeout = window.setTimeout(async () => {
                 const query = searchInput.value.trim();
                 if (query.length > 2) {
                     try {

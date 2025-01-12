@@ -70,8 +70,6 @@ export class TemplateManager {
                 console.error('Error loading template file:', error);
                 console.log('Falling back to default template');
             }
-        } else {
-            console.log('No template path provided, using default template');
         }
     
         try {

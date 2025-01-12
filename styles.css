@@ -1,56 +1,112 @@
-/*
+/* styles.css */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* Modal container */
+.bgg-search-modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    min-height: 200px;
+    max-height: 80vh;
+}
 
-*/
+/* Attribution fixed to bottom */
+.bgg-attribution {
+    margin-top: auto;
+    padding: 0.1rem;
+    text-align: right;
+    background: var(--background-primary);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.bgg-attribution-link {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.bgg-logo {
+    height: 40px;
+    width: auto;
+}
+
+/* Search container */
+.search-container {
+    position: relative;
+    margin-bottom: 0.3rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2rem;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    width: 1rem;
+    height: 1rem;
+}
+
+.search-loading {
+    text-align: center;
+    padding: 0.5rem;
+    color: var(--text-muted);
+}
+
+/* Results */
+.search-results {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+}
 
 .search-result-item {
     display: flex;
-    align-items: center;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--background-modifier-border);
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .search-result-item:hover,
 .search-result-item.is-selected {
-    background-color: #333;
-    color: #fff;
+    background-color: var(--background-modifier-hover);
+}
+
+.search-result-thumbnail {
+    margin-right: 1rem;
 }
 
 .search-result-thumbnail img {
-    width: 50px;
-    height: 50px;
-    border-radius: 4px;
-    object-fit: cover;
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: contain;
 }
 
 .search-result-info {
-    display: flex;
-    flex-direction: column;
-    margin-left: 12px;
+    flex: 1;
 }
 
 .search-result-title {
-    font-weight: bold;
-    font-size: 16px;
-    color: #fff;
+    font-weight: 500;
 }
 
 .search-result-year {
-    color: #888;
-    font-size: 14px;
+    color: var(--text-muted);
+    font-size: 0.9em;
 }
 
-.search-result-item:hover .search-result-title,
-.search-result-item.is-selected .search-result-title {
-    color: #fff;
+.no-results {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-muted);
 }
-
-.search-result-item:hover .search-result-year,
-.search-result-item.is-selected .search-result-year {
-    color: #ddd;
-}
-

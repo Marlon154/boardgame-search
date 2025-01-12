@@ -56,7 +56,7 @@ export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
   // Image settings
   showGameImageInSearch: true,
   enableImageSave: false,
-  imagePath: 'assets/games',
+  imagePath: 'Games/Images',
   
   // General settings
   openPageOnCompletion: true,
