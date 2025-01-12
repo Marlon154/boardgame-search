@@ -3,6 +3,13 @@ import { AbstractInputSuggest, App, PluginSettingTab, Setting, TFile, TFolder } 
 import BoardGamePlugin from '../main';
 
 class FolderSuggestion extends AbstractInputSuggest<TFolder> {
+    private inputEl: HTMLInputElement;
+
+    constructor(app: App, inputEl: HTMLInputElement) {
+        super(app, inputEl);
+        this.inputEl = inputEl;
+    }
+
     getSuggestions(inputStr: string): TFolder[] {
         const folders: TFolder[] = [];
         const inputLower = inputStr.toLowerCase();
@@ -19,9 +26,22 @@ class FolderSuggestion extends AbstractInputSuggest<TFolder> {
     renderSuggestion(folder: TFolder, el: HTMLElement): void {
         el.setText(folder.path);
     }
+
+    selectSuggestion(folder: TFolder): void {
+        this.inputEl.value = folder.path;
+        this.inputEl.trigger("input");
+        this.close();
+    }
 }
 
 class TemplateSuggestion extends AbstractInputSuggest<TFile> {
+    private inputEl: HTMLInputElement;
+
+    constructor(app: App, inputEl: HTMLInputElement) {
+        super(app, inputEl);
+        this.inputEl = inputEl;
+    }
+
     getSuggestions(inputStr: string): TFile[] {
         const files = this.app.vault.getMarkdownFiles();
         const inputLower = inputStr.toLowerCase();
@@ -33,6 +53,12 @@ class TemplateSuggestion extends AbstractInputSuggest<TFile> {
 
     renderSuggestion(file: TFile, el: HTMLElement): void {
         el.setText(file.path);
+    }
+
+    selectSuggestion(file: TFile): void {
+        this.inputEl.value = file.path;
+        this.inputEl.trigger("input");
+        this.close();
     }
 }
 
