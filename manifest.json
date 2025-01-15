@@ -2,7 +2,7 @@
 	"id": "boardgame-search",
 	"name": "Boardgame Search",
 	"version": "0.4.2",
-	"minAppVersion": "0.15.0",
+	"minAppVersion": "1.4.1",
 	"description": "Helps board game enthusiasts track their game collection seamlessly within their notes.",
 	"author": "Marlon May",
 	"authorUrl": "https://github.com/Marlon154",

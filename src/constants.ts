@@ -48,7 +48,7 @@ lastUpdated: {{ date | date('YYYY-MM-DD') }}
 
 | Players | Best | Recommended | Not Recommended |
 |---------|------|-------------|-----------------|
-{%- for vote in game.playerCountPoll %}
+{% for vote in game.playerCountPoll %}
 | {{ vote.playerCount }} | {{ vote.votes['Best'] | default(0) }} | {{ vote.votes['Recommended'] | default(0) }} | {{ vote.votes['Not Recommended'] | default(0) }} |
 {% endfor %}
 
@@ -71,9 +71,9 @@ Total votes: {{ game.playerAgePoll.totalVotes }}
 
 | Age | Votes |
 |-----|-------|
-{%- for result in game.playerAgePoll.results %}
+{% for result in game.playerAgePoll.results %}
 | {{ result.value }} | {{ result.votes }} |
-{% endfor -%}
+{% endfor %}
 
 {% if useCharts %}
 ^ageTable
@@ -93,9 +93,9 @@ Total votes: {{ game.languageDependencePoll.totalVotes }}
 
 | Level | Votes |
 |-------|-------|
-{%- for result in game.languageDependencePoll.results %}
+{% for result in game.languageDependencePoll.results %}
 | {{ result.value }} | {{ result.votes }} |
-{% endfor -%}
+{% endfor %}
 
 {% if useCharts %}
 ^languageTable

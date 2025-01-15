@@ -165,10 +165,10 @@ export class BoardGameSettingTab extends PluginSettingTab {
                 });
         }
 
-        new Setting(containerEl).setName('Chart settings').setHeading();
+        new Setting(containerEl).setName('Chart').setHeading();
 
         new Setting(containerEl)
-            .setName('Use Charts Plugin')
+            .setName('Use Charts plugin')
             .setDesc('Use the Obsidian Charts plugin to visualize poll data (requires Charts plugin to be installed)')
             .addToggle(toggle => 
                 toggle.setValue(this.plugin.settings.useChartPlugin)
@@ -178,7 +178,7 @@ export class BoardGameSettingTab extends PluginSettingTab {
                     }));
 
         new Setting(containerEl)
-            .setName('Chart Width')
+            .setName('Chart width')
             .setDesc('Width of generated charts (e.g., 80%, 600px)')
             .addText(text => 
                 text.setPlaceholder('80%')

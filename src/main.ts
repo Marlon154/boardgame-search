@@ -85,13 +85,13 @@ export default class BoardGamePlugin extends Plugin {
             const folderPath = normalizePath(this.settings.imagePath);
             const filePath = normalizePath(`${folderPath}/${fileName}`);
 
-            const folder = this.app.vault.getAbstractFileByPath(folderPath);
+            const folder = this.app.vault.getFolderByPath(folderPath);
             if (!folder) {
                 await this.app.vault.createFolder(folderPath);
             }
 
-            const file = this.app.vault.getAbstractFileByPath(filePath);
-            if (file instanceof TFile) {
+            const file = this.app.vault.getFileByPath(filePath);
+            if (file) {
                 await this.app.vault.modifyBinary(file, imageData);
             } else {
                 await this.app.vault.createBinary(filePath, imageData);
@@ -136,9 +136,9 @@ export default class BoardGamePlugin extends Plugin {
             const filePath = normalizePath(folderPath ? `${folderPath}/${fileName}.md` : `${fileName}.md`);
 
             let createdFile: TFile;
-            const existingFile = this.app.vault.getAbstractFileByPath(filePath);
-    
-            if (existingFile instanceof TFile) {
+            const existingFile = this.app.vault.getFileByPath(filePath);
+
+            if (existingFile) {
                 if (this.settings.overwriteExistingNote) {
                     await this.app.vault.process(existingFile, (data) => noteContent);
                     createdFile = existingFile;
@@ -149,7 +149,7 @@ export default class BoardGamePlugin extends Plugin {
                 }
             } else {
                 if (folderPath) {
-                    const folder = this.app.vault.getAbstractFileByPath(folderPath);
+                    const folder = this.app.vault.getFolderByPath(folderPath);
                     if (!folder) {
                         await this.app.vault.createFolder(folderPath);
                     }
@@ -157,7 +157,7 @@ export default class BoardGamePlugin extends Plugin {
                 createdFile = await this.app.vault.create(filePath, noteContent);
                 new Notice('Game entry created');
             }
-    
+
             if (this.settings.openPageOnCompletion && createdFile instanceof TFile) {
                 await this.app.workspace.getLeaf(false).openFile(createdFile);
             }
