@@ -41,10 +41,11 @@ lastUpdated: {{ date | date('YYYY-MM-DD') }}
 ## Community Polls
 
 ### Player Count Information
-{% if game.suggestedPlayerCount -%}
-- {{ game.suggestedPlayerCount.best }}
-- {{ game.suggestedPlayerCount.recommended }}
-{%- endif %}
+{% if game.suggestedPlayerCount %}
+{% if game.suggestedPlayerCount.best %}- {{ game.suggestedPlayerCount.best }}{% endif %}
+
+{% if game.suggestedPlayerCount.best %}- {{ game.suggestedPlayerCount.recommended }}{% endif %}{% endif %}
+
 
 | Players | Best | Recommended | Not Recommended |
 |---------|------|-------------|-----------------|
