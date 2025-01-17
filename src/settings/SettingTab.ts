@@ -1,6 +1,7 @@
 // src/settings/SettingTab.ts
 import { AbstractInputSuggest, App, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
 import BoardGamePlugin from '../main';
+import { ImageQuality } from './settings'
 
 class FolderSuggestion extends AbstractInputSuggest<TFolder> {
     private inputEl: HTMLInputElement;
@@ -139,7 +140,7 @@ export class BoardGameSettingTab extends PluginSettingTab {
         // Images section
         new Setting(containerEl).setName('Images').setHeading();
 
-        const enableImages = new Setting(containerEl)
+        new Setting(containerEl)
             .setName('Save images locally')
             .setDesc('Download and save game images to your vault')
             .addToggle(toggle => 
@@ -149,6 +150,22 @@ export class BoardGameSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                         this.display();
                     }));
+
+        if (this.plugin.settings.enableImageSave) {
+            new Setting(containerEl)
+                .setName('Image quality')
+                .setDesc('Choose between smaller thumbnail images or full-size images')
+                .addDropdown(dropdown => 
+                dropdown
+                    .addOption(ImageQuality.Thumbnail, 'Thumbnail (smaller size)')
+                    .addOption(ImageQuality.FullSize, 'Full size (better quality)')
+                    .setValue(this.plugin.settings.imageQuality)
+                    .onChange(async (value: ImageQuality) => {
+                    this.plugin.settings.imageQuality = value;
+                    await this.plugin.saveSettings();
+                    })
+                );
+        }
 
         if (this.plugin.settings.enableImageSave) {
             new Setting(containerEl)

@@ -7,6 +7,11 @@ export enum DefaultFrontmatterKeyType {
   camelCase = 'Camel Case',
 }
 
+export enum ImageQuality {
+  Thumbnail = 'thumbnail',
+  FullSize = 'fullsize'
+}
+
 export interface BoardGamePluginSettings {
   folder: string;
   fileNameFormat: string;
@@ -20,6 +25,7 @@ export interface BoardGamePluginSettings {
   showGameImageInSearch: boolean;
   enableImageSave: boolean;
   imagePath: string;
+  imageQuality: ImageQuality;
   
   // General settings
   openPageOnCompletion: boolean;
@@ -57,6 +63,7 @@ export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
   showGameImageInSearch: true,
   enableImageSave: false,
   imagePath: 'Games/Images',
+  imageQuality: ImageQuality.Thumbnail,
   
   // General settings
   openPageOnCompletion: true,

@@ -5,6 +5,7 @@ import { BoardGameSettingTab } from './settings/SettingTab';
 import { BGGApiManager, BGGGameDetails, BGGSearchResult } from './api/BGGApiManager';
 import { TemplateManager } from './template/TemplateManager';
 import { DEFAULT_TEMPLATE, BGGLOGOIMGAEURL } from './constants';
+import { ImageQuality } from './settings/settings';
 
 export default class BoardGamePlugin extends Plugin {
     settings: BoardGamePluginSettings;
@@ -58,15 +59,13 @@ export default class BoardGamePlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-	async downloadAndSaveImage(game: BGGGameDetails, imageUrl: string): Promise<string> {
-		if (!this.settings.enableImageSave) {
-		    return imageUrl;
-		}
-
+	async downloadAndSaveImage(game: BGGGameDetails): Promise<string> {
 		try {
-		    // Use Obsidian's requestUrl method to fetch the image data
+            const url = this.settings.imageQuality === ImageQuality.Thumbnail ? game.thumbnail : game.image;
+            if (!url) return '';
+
 		    const response = await requestUrl({
-		        url: imageUrl,
+		        url: url,
 		        method: 'GET',
 		        headers: {
 		            Accept: 'image/*',
@@ -100,16 +99,16 @@ export default class BoardGamePlugin extends Plugin {
 		    return filePath;
 		} catch (error) {
 		    console.error('Error downloading or saving image:', error);
-		    return imageUrl; // Fallback to the original URL
+		    return game.image || '';
 		}
 	}
 
     async createGameEntry(gameDetails: BGGGameDetails) {
         try {
             // Handle image first
-            let imageReference = gameDetails.thumbnail || '';
-            if (imageReference && this.settings.enableImageSave) {
-                imageReference = await this.downloadAndSaveImage(gameDetails, imageReference);
+            let imageReference = '';
+            if (this.settings.enableImageSave) {
+                imageReference = await this.downloadAndSaveImage(gameDetails);
             }
     
             // Prepare template context
