@@ -76,7 +76,7 @@ export class BoardGameSettingTab extends PluginSettingTab {
         containerEl.empty();
         
         // Note Creation section
-        new Setting(containerEl).setName('Note Creation').setHeading();
+        new Setting(containerEl).setName('Note creation').setHeading();
 
         new Setting(containerEl)
         .setName('Open notes after creation')
