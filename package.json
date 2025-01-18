@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-boardgame-plugin",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"description": "An Obsidian plugin that helps board game enthusiasts track their game collection seamlessly within their notes.",
 	"main": "main.js",
 	"scripts": {
