@@ -94,10 +94,12 @@ export default class BoardGamePlugin extends Plugin {
             }
 
             const file = this.app.vault.getFileByPath(filePath);
-            if (file && this.settings.overwriteExistingImage) {
-                await this.app.vault.modifyBinary(file, imageData);
-            } else {
-                await this.app.vault.createBinary(filePath, imageData);
+            if (this.settings.overwriteExistingImage) {
+                if (file) {
+                    await this.app.vault.modifyBinary(file, imageData);
+                } else {
+                    await this.app.vault.createBinary(filePath, imageData);
+                }
             }
 
 		    return filePath;
