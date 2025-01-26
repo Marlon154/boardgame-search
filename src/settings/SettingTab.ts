@@ -158,7 +158,7 @@ export class BoardGameSettingTab extends PluginSettingTab {
                 .addDropdown(dropdown => 
                 dropdown
                     .addOption(ImageQuality.Thumbnail, 'Thumbnail (smaller size)')
-                    .addOption(ImageQuality.Medium, 'Medium size (1/4 of full size stoarge)')
+                    .addOption(ImageQuality.Medium, 'Medium size (about 1/2 size of full size)')
                     .addOption(ImageQuality.FullSize, 'Full size (better quality)')
                     .setValue(this.plugin.settings.imageQuality)
                     .onChange(async (value: ImageQuality) => {
