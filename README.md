@@ -1,5 +1,3 @@
-This is work in progress
-
 # Board Game Search
 
 Track and manage your board game collection, play sessions, and statistics directly within Obsidian.
@@ -9,17 +7,31 @@ Track and manage your board game collection, play sessions, and statistics direc
 ## Features
 
 ### 🎲 Board Game Integration
+
 - Search and import board games from [BoardGameGeek](https://boardgamegeek.com/) (BGG)
 - Automatically create game entries with detailed metadata
-- Download and save game thumbnails
+- Download and save game cover images
+
+#### Image download quality
+
+Images are downloaded and stored in different resolutions to optimize for various use cases.
+Here is an example comparison of the different image sizes and their characteristics:
+
+| Version   | Dimensions | File Size | Percentage |
+|-----------|------------|-----------|------------|
+| Thumbnail | 95 x 150   | 3.4 KB    | 11%        |
+| Medium    | 244 x 385  | 14.1 KB   | 47%        |
+| Full      | 488 x 771  | 29.9 KB   | 100%       |
 
 ### 📊 Session Tracking
+
 Work in progress
 ~~- Record individual game play sessions~~
 ~~- Track players, winners, play time, and notes~~
 ~~- Append session details to game entries~~
 
 ### 🛠️ Customizable Settings
+
 - Configure file location for game entries
 - Customize file name format
 - Control image saving preferences
@@ -28,22 +40,26 @@ Work in progress
 ## Installation
 
 ### From Obsidian Plugin Store
+
 Work in progress
-~~1. Open Obsidian~~
-~~2. Go to Settings → Community plugins~~
-~~3. Enable Community Plugins~~
-~~4. Click "Browse" and search for "Boardgame Search"~~
-~~5. Click "Install"~~
+
+1. Open Obsidian
+2. Go to Settings → Community plugins
+3. Enable Community Plugins
+4. Click "Browse" and search for "Boardgame Search"
+5. Click "Install" and then "Enable"
 
 ### Manual Installation
+
 1. Download the latest release from GitHub
 2. Create a folder `your-vault/.obsidian/plugins/obsidian-boardgame-plugin`
-3. Copy `main.js`, `manifest.json`, and `styles.css` into the folder or just extract and move the zip 
+3. Copy `main.js`, `manifest.json`, and `styles.css` into the folder or just extract and move the zip
 4. Enable the plugin in Obsidian
 
 ## Usage
 
 ### Searching for Games
+
 - Click the dice icon in the ribbon
 - Type the game name in the search bar
 - Browse and select a game
@@ -51,6 +67,7 @@ Work in progress
 or use the command `Search BoardGameGeek`
 
 ### Creating Game Entries
+
 - Game entries include:
   - Game title
   - BGG ID
@@ -61,17 +78,18 @@ or use the command `Search BoardGameGeek`
   - Optional thumbnail image
 
 ## Example Workflow
+
 1. Click "Search BoardGameGeek"
 2. Search "Catan"
 3. Select the game
 4. Plugin creates a detailed game entry
 
 ### 📈 Statistics and Visualization
+
 - Support for [Obsidian Charts plugin](https://github.com/phibr0/obsidian-charts)
 - Visualize player count data
 - Age recommendation statistics
 - Language dependency information
-
 
 ## Templating
 

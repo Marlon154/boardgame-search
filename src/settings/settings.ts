@@ -9,6 +9,7 @@ export enum DefaultFrontmatterKeyType {
 
 export enum ImageQuality {
   Thumbnail = 'thumbnail',
+  Medium = 'medium',
   FullSize = 'fullsize'
 }
 
@@ -24,6 +25,7 @@ export interface BoardGamePluginSettings {
   // Image settings
   showGameImageInSearch: boolean;
   enableImageSave: boolean;
+  overwriteExistingImage: boolean;
   imagePath: string;
   imageQuality: ImageQuality;
   
@@ -62,6 +64,7 @@ export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
   // Image settings
   showGameImageInSearch: true,
   enableImageSave: false,
+  overwriteExistingImage: false,
   imagePath: 'Games/Images',
   imageQuality: ImageQuality.Thumbnail,
   

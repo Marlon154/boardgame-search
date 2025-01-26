@@ -18,7 +18,7 @@ export default class BoardGamePlugin extends Plugin {
         this.templateManager = new TemplateManager(this);
 
         // Create the ribbon icon
-        const ribbonIconEl = this.addRibbonIcon('dice', 'Board Game Tracker', (evt: MouseEvent) => {
+        const ribbonIconEl = this.addRibbonIcon('dice', 'Board Game Search', (evt: MouseEvent) => {
             new BGGSearchModal(this).open();
         });
         ribbonIconEl.addClass('boardgame-plugin-ribbon-class');
@@ -76,7 +76,11 @@ export default class BoardGamePlugin extends Plugin {
 		        throw new Error(`Failed to download image: ${response.status}`);
 		    }
 
-		    const imageData = response.arrayBuffer;
+		    let imageData = response.arrayBuffer;
+            if (this.settings.imageQuality === ImageQuality.Medium) {
+                imageData = await this.downscaleImage(imageData);
+            }
+    
 
 		    // Generate file name and path
 		    const gameId = game.id || 'unknown';
@@ -102,6 +106,49 @@ export default class BoardGamePlugin extends Plugin {
 		    return game.image || '';
 		}
 	}
+
+    async downscaleImage(arrayBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+        // Create a blob from the array buffer
+        const blob = new Blob([arrayBuffer]);
+        const imageUrl = URL.createObjectURL(blob);
+    
+        try {
+            const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = imageUrl;
+            });
+    
+            const canvas = document.createElement('canvas');
+            const width = Math.floor(img.width / 2);
+            const height = Math.floor(img.height / 2);
+            canvas.width = width;
+            canvas.height = height;
+    
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                throw new Error('Could not get canvas context');
+            }
+            
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+    
+            ctx.drawImage(img, 0, 0, width, height);
+    
+            const blob = await new Promise<Blob>((resolve) => {
+                canvas.toBlob(
+                    (blob) => resolve(blob!),
+                    'image/jpeg',
+                    0.85
+                );
+            });
+    
+            return await blob.arrayBuffer();
+        } finally {
+            URL.revokeObjectURL(imageUrl);
+        }
+    }
 
     async createGameEntry(gameDetails: BGGGameDetails) {
         try {

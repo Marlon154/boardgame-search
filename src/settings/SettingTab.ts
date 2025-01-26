@@ -158,6 +158,7 @@ export class BoardGameSettingTab extends PluginSettingTab {
                 .addDropdown(dropdown => 
                 dropdown
                     .addOption(ImageQuality.Thumbnail, 'Thumbnail (smaller size)')
+                    .addOption(ImageQuality.Medium, 'Medium size (1/4 of full size stoarge)')
                     .addOption(ImageQuality.FullSize, 'Full size (better quality)')
                     .setValue(this.plugin.settings.imageQuality)
                     .onChange(async (value: ImageQuality) => {
@@ -165,6 +166,17 @@ export class BoardGameSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                     })
                 );
+            
+            new Setting(containerEl)
+                .setName('Overwrite existing images')
+                .setDesc('If a image is already in the location it gets overwritten. Useful for updating images to other quality.')
+                .addToggle(toggle => 
+                    toggle.setValue(this.plugin.settings.overwriteExistingImage)
+                        .onChange(async (value) => {
+                            this.plugin.settings.overwriteExistingImage = value;
+                            await this.plugin.saveSettings();
+                        })
+                    );
         }
 
         if (this.plugin.settings.enableImageSave) {
