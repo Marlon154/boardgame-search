@@ -41,8 +41,6 @@ Work in progress
 
 ### From Obsidian Plugin Store
 
-Work in progress
-
 1. Open Obsidian
 2. Go to Settings → Community plugins
 3. Enable Community Plugins
