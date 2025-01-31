@@ -1,6 +1,6 @@
 # Board Game Search
 
-Track and manage your board game collection, play sessions, and statistics directly within Obsidian.
+Track and manage your board game collection directly within Obsidian.
 
 <img src="https://raw.githubusercontent.com/Marlon154/obsidian-boardgame-plugin/main/docs/search-screenshot.png" alt="A screenshot show the search for boardgames.">
 
