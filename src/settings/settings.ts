@@ -14,6 +14,8 @@ export enum ImageQuality {
 }
 
 export interface BoardGamePluginSettings {
+  showRibbon: boolean;
+
   folder: string;
   fileNameFormat: string;
   frontmatter: string;
@@ -52,6 +54,7 @@ export interface BoardGamePluginSettings {
 }
 
 export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
+  showRibbon: true,
   // File and template settings
   folder: '',
   fileNameFormat: '{{gameName}}',

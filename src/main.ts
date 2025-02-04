@@ -18,10 +18,12 @@ export default class BoardGamePlugin extends Plugin {
         this.templateManager = new TemplateManager(this);
 
         // Create the ribbon icon
-        const ribbonIconEl = this.addRibbonIcon('dice', 'Board Game Search', (evt: MouseEvent) => {
-            new BGGSearchModal(this).open();
-        });
-        ribbonIconEl.addClass('boardgame-plugin-ribbon-class');
+        if (this.settings.showRibbon) {
+            const ribbonIconEl = this.addRibbonIcon('dice', 'Board Game Search', (evt: MouseEvent) => {
+                new BGGSearchModal(this).open();
+            });
+            ribbonIconEl.addClass('boardgame-plugin-ribbon-class');
+        }
 
         // Add status bar item
         // const statusBarItemEl = this.addStatusBarItem();
