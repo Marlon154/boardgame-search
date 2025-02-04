@@ -176,6 +176,55 @@ beginAtZero: true
 {% endif %}
 ```
 
+## Example Overview
+
+Here is an example for a collection, which uses:
+
+- [Dataview](https://blacksmithgu.github.io/obsidian-dataview/)
+- [Meta Bind](https://github.com/mProjectsCode/obsidian-meta-bind-plugin)
+- [Minimal Theme](https://github.com/kepano/obsidian-minimal)
+
+Code:
+````
+---
+notetype: database
+cssclasses:
+  - cards
+  - cards-2-3
+  - cards-cover
+  - table-max
+  - table-nowrap
+---
+
+```meta-bind-button
+label: New Game
+icon: ""
+hidden: false
+class: ""
+tooltip: ""
+id: ""
+style: default
+actions:
+  - type: command
+    command: boardgame-search:search-bgg
+
+```
+
+```dataview
+TABLE WITHOUT ID
+	embed(link(meta(link(image)).path)) as "",
+	link(file.link, title) as Title,
+	ownership,
+	choice(played, "✅", " - ") as Played
+FROM #boardgame 
+WHERE !contains(file.path, "templates")
+SORT title ASC
+```
+````
+
+<img src="https://raw.githubusercontent.com/Marlon154/obsidian-boardgame-plugin/main/docs/example_overview.png" alt="Overview over the board game collection.">
+
+
 ## Support
 
 If you find this plugin useful, please consider a donation.
