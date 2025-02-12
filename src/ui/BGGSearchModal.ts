@@ -1,4 +1,4 @@
-import { SuggestModal, Notice } from 'obsidian';
+import { SuggestModal, Notice, Setting } from 'obsidian';
 import BoardGamePlugin from '../main';
 import { BGGSearchResult } from '../api/BGGApiManager';
 import { BGGLOGOBASE64 } from '../constants';
@@ -9,6 +9,7 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
     private searchDebounceTimeout: NodeJS.Timeout | undefined;
     private loadingEl: HTMLElement;
     private lastQuery = '';
+    private exactQuery = false;
 
     constructor(plugin: BoardGamePlugin) {
         super(plugin.app);
@@ -16,14 +17,29 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
         
         this.setPlaceholder('Search for a board game...');
         this.modalEl.addClass('bgg-search-modal');
-        
+
         this.loadingEl = this.modalEl.createDiv({
             cls: 'search-loading',
             text: 'Searching BoardGameGeek...'
         });
-        
+
         this.loadingEl.hide();
+                
+        this.addExactOption();
         this.addBGGAttribution();
+    }
+
+    private addExactOption(): void {
+        new Setting(this.modalEl)
+            .setName('Exact search')
+            .addToggle((tgl) => tgl.onChange((value) => this.onExactToggle(value)));
+    }
+
+    private onExactToggle(value: boolean) {
+        this.exactQuery = value;
+        //this.getSuggestions(this.inputEl.value);
+        //this.inputEl.setText(this.inputEl.getText());
+        this.inputEl.dispatchEvent(new InputEvent("input"));
     }
 
     private addBGGAttribution(): void {
@@ -74,7 +90,7 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
                 }
 
                 try {
-                    const results = await this.plugin.bggApi.searchGames(query);
+                    const results = await this.plugin.bggApi.searchGames(query, this.exactQuery);
                     if (query === this.lastQuery) {
                         resolve(results);
                     } else {
