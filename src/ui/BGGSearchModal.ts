@@ -37,8 +37,6 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
 
     private onExactToggle(value: boolean) {
         this.exactQuery = value;
-        //this.getSuggestions(this.inputEl.value);
-        //this.inputEl.setText(this.inputEl.getText());
         this.inputEl.dispatchEvent(new InputEvent("input"));
     }
 
