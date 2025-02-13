@@ -25,7 +25,7 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
 
         this.loadingEl.hide();
                 
-        this.addBGGAttribution();
+        this.addFooter();
     }
 
     private onExactToggle(value: boolean) {
@@ -33,7 +33,7 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
         this.inputEl.dispatchEvent(new InputEvent('input'));
     }
 
-    private addBGGAttribution(): void {
+    private addFooter(): void {
         const constantEl = this.modalEl.createDiv('option-slider');
         new Setting(constantEl)
             .setName('Exact search')
