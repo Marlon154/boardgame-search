@@ -25,22 +25,21 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
 
         this.loadingEl.hide();
                 
-        this.addExactOption();
         this.addBGGAttribution();
-    }
-
-    private addExactOption(): void {
-        new Setting(this.modalEl)
-            .setName('Exact search')
-            .addToggle((tgl) => tgl.onChange((value) => this.onExactToggle(value)));
     }
 
     private onExactToggle(value: boolean) {
         this.exactQuery = value;
-        this.inputEl.dispatchEvent(new InputEvent("input"));
+        this.inputEl.dispatchEvent(new InputEvent('input'));
     }
 
     private addBGGAttribution(): void {
+        const constantEl = this.modalEl.createDiv('option-slider');
+        new Setting(constantEl)
+            .setName('Exact search')
+            .setClass('option-slider')
+            .addToggle((tgl) => tgl.onChange((value) => this.onExactToggle(value)));
+        
         const attributionEl = this.modalEl.createDiv('bgg-attribution');
         const linkEl = attributionEl.createEl('a', {
             href: 'https://boardgamegeek.com',

@@ -32,6 +32,12 @@
     width: auto;
 }
 
+.option-slider {
+    text-align: right;    
+    display: inline-flex;
+    margin-left: auto;
+}
+
 /* Search container */
 .search-container {
     position: relative;
