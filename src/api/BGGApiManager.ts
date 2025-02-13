@@ -164,16 +164,17 @@ export class BGGApiManager {
         });
     }
 
-    async searchGames(query: string): Promise<BGGSearchResult[]> {
+    async searchGames(query: string,  exactQuery: boolean): Promise<BGGSearchResult[]> {
         // Check cache first
         const cachedResults = this.cache.getSearchResults(query);
         if (cachedResults) {
             return cachedResults;
         }
-
         try {
-            const url = `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame`;
-            const response = await this.enqueueRequest(url);
+            const response = await requestUrl({
+                url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame&type=boardgame&exact=${exactQuery ? 1 : 0}`,
+                method: 'GET'
+            });
             
             if (response.status !== 200) {
                 throw new Error('Search request failed');

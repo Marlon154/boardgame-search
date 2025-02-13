@@ -32,6 +32,19 @@
     width: auto;
 }
 
+.exact-match-slider {
+    text-align: left;    
+    display: inline-flex;
+    margin-right: auto;
+    margin-left: 0.5em;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
 /* Search container */
 .search-container {
     position: relative;
