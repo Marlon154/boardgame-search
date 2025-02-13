@@ -34,13 +34,14 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
     }
 
     private addFooter(): void {
-        const constantEl = this.modalEl.createDiv('option-slider');
+        const footerEL = this.modalEl.createDiv('footer')
+        const constantEl = footerEL.createDiv('exact-match-slider');
         new Setting(constantEl)
             .setName('Exact search')
-            .setClass('option-slider')
+            .setClass('exact-match-slider')
             .addToggle((tgl) => tgl.onChange((value) => this.onExactToggle(value)));
         
-        const attributionEl = this.modalEl.createDiv('bgg-attribution');
+        const attributionEl = footerEL.createDiv('bgg-attribution');
         const linkEl = attributionEl.createEl('a', {
             href: 'https://boardgamegeek.com',
             cls: 'bgg-attribution-link',
