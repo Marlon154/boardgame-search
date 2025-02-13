@@ -1,4 +1,4 @@
-import { SuggestModal, Notice } from 'obsidian';
+import { SuggestModal, Notice, Setting } from 'obsidian';
 import BoardGamePlugin from '../main';
 import { BGGSearchResult } from '../api/BGGApiManager';
 import { BGGLOGOBASE64 } from '../constants';
@@ -9,6 +9,7 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
     private searchDebounceTimeout: NodeJS.Timeout | undefined;
     private loadingEl: HTMLElement;
     private lastQuery = '';
+    private exactQuery = false;
 
     constructor(plugin: BoardGamePlugin) {
         super(plugin.app);
@@ -16,18 +17,31 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
         
         this.setPlaceholder('Search for a board game...');
         this.modalEl.addClass('bgg-search-modal');
-        
+
         this.loadingEl = this.modalEl.createDiv({
             cls: 'search-loading',
             text: 'Searching BoardGameGeek...'
         });
-        
+
         this.loadingEl.hide();
-        this.addBGGAttribution();
+                
+        this.addFooter();
     }
 
-    private addBGGAttribution(): void {
-        const attributionEl = this.modalEl.createDiv('bgg-attribution');
+    private onExactToggle(value: boolean) {
+        this.exactQuery = value;
+        this.inputEl.dispatchEvent(new InputEvent('input'));
+    }
+
+    private addFooter(): void {
+        const footerEL = this.modalEl.createDiv('footer')
+        const constantEl = footerEL.createDiv('exact-match-slider');
+        new Setting(constantEl)
+            .setName('Exact search')
+            .setClass('exact-match-slider')
+            .addToggle((tgl) => tgl.onChange((value) => this.onExactToggle(value)));
+        
+        const attributionEl = footerEL.createDiv('bgg-attribution');
         const linkEl = attributionEl.createEl('a', {
             href: 'https://boardgamegeek.com',
             cls: 'bgg-attribution-link',
@@ -74,7 +88,7 @@ export class BGGSearchModal extends SuggestModal<BGGSearchResult> {
                 }
 
                 try {
-                    const results = await this.plugin.bggApi.searchGames(query);
+                    const results = await this.plugin.bggApi.searchGames(query, this.exactQuery);
                     if (query === this.lastQuery) {
                         resolve(results);
                     } else {

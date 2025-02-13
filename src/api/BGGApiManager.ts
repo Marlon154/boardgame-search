@@ -62,10 +62,10 @@ export class BGGApiManager {
     
     constructor() {}
 
-    async searchGames(query: string): Promise<BGGSearchResult[]> {
+    async searchGames(query: string, exactQuery: boolean): Promise<BGGSearchResult[]> {
         try {
             const response = await requestUrl({
-                url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame`,
+                url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame&exact=${exactQuery ? 1 : 0}`,
                 method: 'GET'
             });
             
