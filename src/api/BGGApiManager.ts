@@ -1,5 +1,6 @@
 // src/api/BGGApiManager.ts
-import { requestUrl, normalizePath } from 'obsidian';
+import { requestUrl, RequestUrlResponse } from 'obsidian';
+import { BGGCache } from './BGGCache';
 
 export interface PollResult {
     value: string;
@@ -57,61 +58,166 @@ export interface BGGGameDetails {
     languageDependencePoll: LanguageDependencePoll;
 }
 
+export interface RequestQueueItem {
+    url: string;
+    resolve: (value: any) => void;
+    reject: (error: any) => void;
+    retries: number;
+}
+
 export class BGGApiManager {
     private readonly baseUrl = 'https://api.geekdo.com/xmlapi2';
+    private readonly minRequestInterval = 2000; // 2 seconds between requests
+    private readonly maxRetries = 3;
+    private readonly retryDelay = 3000; // 3 seconds
+    private requestQueue: RequestQueueItem[] = [];
+    private isProcessingQueue = false;
+    private lastRequestTime = 0;
+    private cache: BGGCache;
     
-    constructor() {}
+    constructor() {
+        this.cache = new BGGCache();
+    }
 
-    async searchGames(query: string): Promise<BGGSearchResult[]> {
+    private async processQueue() {
+        if (this.isProcessingQueue || this.requestQueue.length === 0) {
+            return;
+        }
+
+        this.isProcessingQueue = true;
+
+        while (this.requestQueue.length > 0) {
+            const currentTime = Date.now();
+            const timeSinceLastRequest = currentTime - this.lastRequestTime;
+
+            if (timeSinceLastRequest < this.minRequestInterval) {
+                await new Promise(resolve => 
+                    setTimeout(resolve, this.minRequestInterval - timeSinceLastRequest)
+                );
+            }
+
+            const request = this.requestQueue[0];
+            
+            try {
+                const response = await this.makeRequest(request.url);
+                
+                // Handle 202 status (request queued by BGG)
+                if (response.status === 202) {
+                    if (request.retries < this.maxRetries) {
+                        request.retries++;
+                        // Move to end of queue
+                        this.requestQueue.push(this.requestQueue.shift()!);
+                        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+                        continue;
+                    } else {
+                        throw new Error('Max retries exceeded for queued request');
+                    }
+                }
+
+                this.requestQueue.shift();
+                request.resolve(response);
+
+            } catch (error) {
+                // Handle rate limit (429) or other errors
+                if (error.status === 429) {
+                    if (request.retries < this.maxRetries) {
+                        request.retries++;
+                        this.requestQueue.push(this.requestQueue.shift()!);
+                        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+                        continue;
+                    }
+                }
+                
+                this.requestQueue.shift();
+                request.reject(error);
+            }
+
+            this.lastRequestTime = Date.now();
+        }
+
+        this.isProcessingQueue = false;
+    }
+
+    private async makeRequest(url: string): Promise<RequestUrlResponse> {
+        return requestUrl({
+            url,
+            method: 'GET',
+            headers: {
+                'Accept': 'application/xml',
+                'User-Agent': 'Obsidian-BGG-Plugin/1.0'
+            }
+        });
+    }
+
+    private enqueueRequest(url: string): Promise<RequestUrlResponse> {
+        return new Promise((resolve, reject) => {
+            this.requestQueue.push({
+                url,
+                resolve,
+                reject,
+                retries: 0
+            });
+            
+            if (!this.isProcessingQueue) {
+                this.processQueue();
+            }
+        });
+    }
+
+    async searchGames(query: string, exactQuery: boolean): Promise<BGGSearchResult[]> {
+        // Check cache first
+        const cachedResults = this.cache.getSearchResults(query, exactQuery);
+        if (cachedResults) {
+            return cachedResults;
+        }
+    
         try {
             const response = await requestUrl({
-                url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame`,
+                url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame&type=boardgame&exact=${exactQuery ? 1 : 0}`,
                 method: 'GET'
             });
             
             if (response.status !== 200) {
-                throw new Error('Network response was not ok');
+                throw new Error('Search request failed');
             }
-            
+    
+            // Parse the initial response
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(response.text, 'text/xml');
-            
             const items = xmlDoc.getElementsByTagName('item');
-            const results: BGGSearchResult[] = [];
-            
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
+    
+            // Process each game in parallel
+            const promises = Array.from(items).map(async (item) => {
                 const nameEl = item.getElementsByTagName('name')[0];
                 const yearPublishedEl = item.getElementsByTagName('yearpublished')[0];
+                const gameId = item.getAttribute('id') || '';
                 
-                results.push({
-                    id: item.getAttribute('id') || '',
+                const details = await this.getGameDetails(gameId).catch(() => null);
+                if (!details) return null;
+        
+                const result: BGGSearchResult = {
+                    id: gameId,
                     name: nameEl?.getAttribute('value') || '',
-                    yearPublished: yearPublishedEl?.getAttribute('value') || undefined,
-                    type: item.getAttribute('type') || ''
-                });
-            }
+                    type: item.getAttribute('type') || '',
+                    thumbnail: details.thumbnail,
+                    minPlayers: details.minPlayers,
+                    maxPlayers: details.maxPlayers,
+                    playingTime: details.playingTime
+                };
+        
+                if (yearPublishedEl?.getAttribute('value')) {
+                    result.yearPublished = yearPublishedEl.getAttribute('value') || undefined;
+                }
+        
+                return result;
+            });        
             
-            // Get details for each game
-            const detailedResults = await Promise.all(
-                results.map(async (result) => {
-                    try {
-                        const details = await this.getGameDetails(result.id);
-                        return {
-                            ...result,
-                            thumbnail: details.thumbnail,
-                            minPlayers: details.minPlayers,
-                            maxPlayers: details.maxPlayers,
-                            playingTime: details.playingTime
-                        };
-                    } catch (error) {
-                        console.error(`Error fetching details for game ${result.id}:`, error);
-                        return result;
-                    }
-                })
-            );
+            // Filter out any null results from failed fetches
+            const results = (await Promise.all(promises)).filter((result): result is BGGSearchResult => result !== null);
             
-            return detailedResults;
+            this.cache.setSearchResults(query, results, exactQuery);
+            return results;
+    
         } catch (error) {
             console.error('Error searching BGG:', error);
             throw new Error('Failed to search BoardGameGeek');

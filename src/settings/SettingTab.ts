@@ -74,6 +74,15 @@ export class BoardGameSettingTab extends PluginSettingTab {
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
+        new Setting(containerEl)
+        .setName('Add icon to ribbon')
+        .setDesc('Add a dice icon to the ribbon for quick access to the plugin. Requires deactivating and reactivating the plugin to take effect.')
+        .addToggle(toggle => 
+            toggle.setValue(this.plugin.settings.showRibbon)
+                .onChange(async (value) => {
+                    this.plugin.settings.showRibbon = value;
+                    await this.plugin.saveSettings();
+                }));
         
         // Note Creation section
         new Setting(containerEl).setName('Note creation').setHeading();
