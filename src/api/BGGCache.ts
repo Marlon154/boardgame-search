@@ -4,6 +4,7 @@ import { BGGSearchResult } from './BGGApiManager';
 interface CacheEntry<T> {
     data: T;
     timestamp: number;
+    exactQuery: boolean;
 }
 
 interface SearchCache {
@@ -16,14 +17,14 @@ export class BGGCache {
     private readonly maxCacheSize: number;
     
     constructor(options: {
-        searchTTL?: number,     // Default 5 minutes
+        searchTTL?: number,     // Default 15 minutes
         maxCacheSize?: number   // Default 100 entries
     } = {}) {
-        this.searchTTL = options.searchTTL || 5 * 60 * 1000;
-        this.maxCacheSize = options.maxCacheSize || 128;
+        this.searchTTL = options.searchTTL || 15 * 60 * 1000;
+        this.maxCacheSize = options.maxCacheSize || 256;
     }
 
-    getSearchResults(query: string): BGGSearchResult[] | null {
+    getSearchResults(query: string, exactSearch: boolean): BGGSearchResult[] | null {
         const normalizedQuery = this.normalizeQuery(query);
         const entry = this.searchCache[normalizedQuery];
         
@@ -36,7 +37,11 @@ export class BGGCache {
             return null;
         }
 
-        return entry.data;
+        if (entry.exactQuery === exactSearch) {
+            return entry.data;
+        }
+
+        return null;
     }
 
     private findPartialMatch(query: string): BGGSearchResult[] | null {
@@ -57,7 +62,7 @@ export class BGGCache {
         return null;
     }
 
-    setSearchResults(query: string, results: BGGSearchResult[]): void {
+    setSearchResults(query: string, results: BGGSearchResult[], exactSearch: boolean): void {
         const normalizedQuery = this.normalizeQuery(query);
         
         // Enforce cache size limit
@@ -67,7 +72,8 @@ export class BGGCache {
         
         this.searchCache[normalizedQuery] = {
             data: results,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            exactQuery: exactSearch
         };
     }
 

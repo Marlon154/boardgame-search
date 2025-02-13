@@ -69,7 +69,7 @@ export class BGGApiManager {
     private readonly baseUrl = 'https://api.geekdo.com/xmlapi2';
     private readonly minRequestInterval = 2000; // 2 seconds between requests
     private readonly maxRetries = 3;
-    private readonly retryDelay = 4000; // 4 seconds
+    private readonly retryDelay = 3000; // 3 seconds
     private requestQueue: RequestQueueItem[] = [];
     private isProcessingQueue = false;
     private lastRequestTime = 0;
@@ -164,12 +164,13 @@ export class BGGApiManager {
         });
     }
 
-    async searchGames(query: string,  exactQuery: boolean): Promise<BGGSearchResult[]> {
+    async searchGames(query: string, exactQuery: boolean): Promise<BGGSearchResult[]> {
         // Check cache first
-        const cachedResults = this.cache.getSearchResults(query);
+        const cachedResults = this.cache.getSearchResults(query, exactQuery);
         if (cachedResults) {
             return cachedResults;
         }
+    
         try {
             const response = await requestUrl({
                 url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame&type=boardgame&exact=${exactQuery ? 1 : 0}`,
@@ -179,41 +180,44 @@ export class BGGApiManager {
             if (response.status !== 200) {
                 throw new Error('Search request failed');
             }
-
+    
+            // Parse the initial response
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(response.text, 'text/xml');
             const items = xmlDoc.getElementsByTagName('item');
-            const results: BGGSearchResult[] = [];
-
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
+    
+            // Process each game in parallel
+            const promises = Array.from(items).map(async (item) => {
                 const nameEl = item.getElementsByTagName('name')[0];
                 const yearPublishedEl = item.getElementsByTagName('yearpublished')[0];
-                
                 const gameId = item.getAttribute('id') || '';
                 
-                try {
-                    // Get additional details for each game
-                    const details = await this.getGameDetails(gameId);
-                    
-                    results.push({
-                        id: gameId,
-                        name: nameEl?.getAttribute('value') || '',
-                        yearPublished: yearPublishedEl?.getAttribute('value') || '',
-                        type: item.getAttribute('type') || '',
-                        thumbnail: details.thumbnail,
-                        minPlayers: details.minPlayers,
-                        maxPlayers: details.maxPlayers,
-                        playingTime: details.playingTime
-                    });
-                } catch (error) {
-                    console.error(`Error fetching details for game ${gameId}:`, error);
+                const details = await this.getGameDetails(gameId).catch(() => null);
+                if (!details) return null;
+        
+                const result: BGGSearchResult = {
+                    id: gameId,
+                    name: nameEl?.getAttribute('value') || '',
+                    type: item.getAttribute('type') || '',
+                    thumbnail: details.thumbnail,
+                    minPlayers: details.minPlayers,
+                    maxPlayers: details.maxPlayers,
+                    playingTime: details.playingTime
+                };
+        
+                if (yearPublishedEl?.getAttribute('value')) {
+                    result.yearPublished = yearPublishedEl.getAttribute('value') || undefined;
                 }
-            }
-
-            this.cache.setSearchResults(query, results);
+        
+                return result;
+            });        
+            
+            // Filter out any null results from failed fetches
+            const results = (await Promise.all(promises)).filter((result): result is BGGSearchResult => result !== null);
+            
+            this.cache.setSearchResults(query, results, exactQuery);
             return results;
- 
+    
         } catch (error) {
             console.error('Error searching BGG:', error);
             throw new Error('Failed to search BoardGameGeek');
