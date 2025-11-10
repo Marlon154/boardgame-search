@@ -59,6 +59,7 @@ export default class BoardGamePlugin extends Plugin {
 
     async saveSettings() {
         await this.saveData(this.settings);
+        this.bggApi = new BGGApiManager(this.settings.bggApiKey);
     }
 
 	async downloadAndSaveImage(game: BGGGameDetails): Promise<string> {
