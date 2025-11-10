@@ -39,6 +39,7 @@ export interface BoardGamePluginSettings {
   // BGG Integration settings
   enableBGGIntegration: boolean;
   bggUsername: string;
+  bggApiKey: string;
   syncWithBGG: boolean;
 
   // Session tracking
@@ -79,6 +80,7 @@ export const DEFAULT_SETTINGS: BoardGamePluginSettings = {
   // BGG Integration
   enableBGGIntegration: true,
   bggUsername: '',
+  bggApiKey: '',
   syncWithBGG: false,
 
   // Session tracking - disabled by default

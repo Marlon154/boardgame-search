@@ -14,7 +14,7 @@ export default class BoardGamePlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
-        this.bggApi = new BGGApiManager();
+        this.bggApi = new BGGApiManager(this.settings.bggApiKey);
         this.templateManager = new TemplateManager(this);
 
         // Create the ribbon icon

@@ -1,5 +1,5 @@
 // src/api/BGGApiManager.ts
-import { requestUrl, RequestUrlResponse } from 'obsidian';
+import { requestUrl, RequestUrlResponse, Notice } from 'obsidian';
 import { BGGCache } from './BGGCache';
 
 export interface PollResult {
@@ -74,9 +74,25 @@ export class BGGApiManager {
     private isProcessingQueue = false;
     private lastRequestTime = 0;
     private cache: BGGCache;
+    private apiKey: string;
     
-    constructor() {
+    constructor(apiKey: string = '') {
         this.cache = new BGGCache();
+        this.apiKey = apiKey;
+    }
+
+    private getHeaders(): Record<string, string> {
+        const headers: Record<string, string> = {
+            'Accept': 'application/xml',
+            'User-Agent': 'Obsidian-BGG-Plugin/1.0'
+        };
+        if (this.apiKey) {
+            headers['Authorization'] = `Bearer ${this.apiKey}`;
+        } else {
+            new Notice('BGG API key not configured. Please add your API key in settings.', 5000);
+        }
+
+        return headers;
     }
 
     private async processQueue() {
@@ -142,10 +158,7 @@ export class BGGApiManager {
         return requestUrl({
             url,
             method: 'GET',
-            headers: {
-                'Accept': 'application/xml',
-                'User-Agent': 'Obsidian-BGG-Plugin/1.0'
-            }
+            headers: this.getHeaders()
         });
     }
 
@@ -174,7 +187,8 @@ export class BGGApiManager {
         try {
             const response = await requestUrl({
                 url: `${this.baseUrl}/search?query=${encodeURIComponent(query)}&type=boardgame&type=boardgame&exact=${exactQuery ? 1 : 0}`,
-                method: 'GET'
+                method: 'GET',
+                headers: this.getHeaders()
             });
             
             if (response.status !== 200) {
@@ -328,7 +342,8 @@ export class BGGApiManager {
         try {
             const response = await requestUrl({
                 url: `${this.baseUrl}/thing?id=${gameId}&stats=1`,  // Include stats for rating and polls
-                method: 'GET'
+                method: 'GET',
+                headers: this.getHeaders()
             });
             
             if (response.status !== 200) {

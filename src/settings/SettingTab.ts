@@ -74,6 +74,18 @@ export class BoardGameSettingTab extends PluginSettingTab {
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
+
+        new Setting(containerEl)
+        .setName('BoardGameGeek API key')
+        .setDesc('Your BGG API key (required for search)')
+        .addText(text => 
+            text.setPlaceholder('Enter your BGG API key')
+                .setValue(this.plugin.settings.bggApiKey)
+                .onChange(async (value) => {
+                    this.plugin.settings.bggApiKey = value;
+                    await this.plugin.saveSettings();
+                }));
+
         new Setting(containerEl)
         .setName('Add icon to ribbon')
         .setDesc('Add a dice icon to the ribbon for quick access to the plugin. Requires deactivating and reactivating the plugin to take effect.')
