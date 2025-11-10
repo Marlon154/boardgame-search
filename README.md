@@ -1,20 +1,21 @@
 # ⚠️ Important: BGG API Changes
 
-**Action Required:** BoardGameGeek is implementing mandatory API key registration for all API access.
+**Action Required:** BoardGameGeek now requires API key registration for all API access.
 
 ## What You Need to Do
 
-1. **Register your application** at [BoardGameGeek Applications](https://boardgamegeek.com/applications)
-2. **Create an API token** for your registered application
-3. **Keep your token ready** - an update is coming soon that will add API key configuration to the plugin settings
+1. **Update the plugin** to the latest version (2.0.0+) that supports API keys
+2. **Create a BGG account** at [BoardGameGeek](https://boardgamegeek.com/register) if you don't have one
+3. **Register your application** at [BoardGameGeek Applications](https://boardgamegeek.com/applications)
+   - Note: Approval typically takes a few days
+   - Most users should select "non-commercial" for personal use
+4. **Generate an API token** once your application is approved
+5. **Add your token** in Obsidian → Settings → Board Search → Insert at BoradGameGeek API key 
 
-## Why This Matters?
+## Why This Matters
 
-**API keys are required now**
-Without an API key, the search will not work.
+**Without an API key, the plugin will not work.** BGG now requires authentication for all API requests.
 
-**Get your API key now to ensure it works!**
-**Plugin update coming soon** to support API key configuration in settings
 
 # Board Game Search
 
