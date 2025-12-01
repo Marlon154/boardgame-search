@@ -110,33 +110,74 @@ or use the command `Search BoardGameGeek`
 
 ## Templating
 
-The plugin uses Nunjucks templating for customizable game entries. Access available template data using the Data Explorer command in Obsidian.
 
-### Available Template Variables
+The plugin uses [Nunjucks](https://github.com/mozilla/nunjucks) templating for customizable game entries.
+If no template is defined, it will fall back to a default template.
 
-```markdown
-game:
-  name: string
-  id: string
-  minPlayers: number
-  maxPlayers: number
-  playTime: number
-  yearPublished: string
-  rating: number
-  image: string
-  description: string
-  suggestedPlayerCount:
-    best: string
-    recommended: string
-  playerCountPoll: Array
-  playerAgePoll: object
-  languageDependencePoll: object
+Use double curly braces to access template variables in your template, for example `{{ game.name }}` or `{{ game.rating }}`.
+The following fields are available:
 
-useCharts: boolean
-chartWidth: string
-useLocalImages: boolean
-date: Date
-```
+### Game Object Fields
+
+| Variable Path | Type | Description |
+|--------------|------|-------------|
+| `game.id` | string | BoardGameGeek game ID |
+| `game.name` | string | Game name |
+| `game.yearPublished` | string | Year the game was published |
+| `game.description` | string | Full game description from BGG |
+| `game.image` | string | URL or local path to full-size game image |
+| `game.thumbnail` | string | URL or local path to thumbnail image |
+| `game.minPlayers` | number | Minimum number of players |
+| `game.maxPlayers` | number | Maximum number of players |
+| `game.playingTime` | number | Average playing time in minutes |
+| `game.minPlayTime` | number | Minimum playing time in minutes |
+| `game.maxPlayTime` | number | Maximum playing time in minutes |
+| `game.minAge` | number | Minimum recommended age |
+| `game.rating` | number | BGG average rating (out of 10) |
+| `game.weight` | number | Game complexity rating |
+
+### Suggested Player Count
+
+| Variable Path | Type | Description |
+|--------------|------|-------------|
+| `game.suggestedPlayerCount.best` | string | Community-voted best player count |
+| `game.suggestedPlayerCount.recommended` | string | Community-voted recommended player count |
+
+### Player Count Poll (Array)
+
+| Variable Path | Type | Description |
+|--------------|------|-------------|
+| `game.playerCountPoll[].playerCount` | string | Number of players (e.g., "3", "4+") |
+| `game.playerCountPoll[].votes` | object | Vote counts by category (Best, Recommended, Not Recommended) |
+| `game.playerCountPoll[].total` | number | Total votes for this player count |
+
+### Player Age Poll
+
+| Variable Path | Type | Description |
+|--------------|------|-------------|
+| `game.playerAgePoll.results[]` | array | Array of age poll results |
+| `game.playerAgePoll.results[].value` | string | Age category (e.g., "8+", "12+") |
+| `game.playerAgePoll.results[].votes` | number | Number of votes for this age |
+| `game.playerAgePoll.totalVotes` | number | Total votes in age poll |
+
+### Language Dependence Poll
+
+| Variable Path | Type | Description |
+|--------------|------|-------------|
+| `game.languageDependencePoll.results[]` | array | Array of language dependence results |
+| `game.languageDependencePoll.results[].value` | string | Dependence level description |
+| `game.languageDependencePoll.results[].votes` | number | Number of votes for this level |
+| `game.languageDependencePoll.totalVotes` | number | Total votes in language poll |
+
+### Additional Context Variables
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `useLocalImages` | boolean | Whether images are saved locally |
+| `useCharts` | boolean | Whether Charts plugin integration is enabled |
+| `chartWidth` | string | Configured chart width (e.g., "80%", "600px") |
+| `date` | Date | Current date/time when note is created |
+
 
 ### Example Template
 
@@ -174,6 +215,7 @@ Use the `persist` tag to create sections that won't be overwritten on reimport:
 Your persistent content here
 {% endpersist %}
 ```
+Inspired by [zotero integration](https://github.com/mgmeyers/obsidian-zotero-integration).
 
 ### Charts Support
 
@@ -202,6 +244,8 @@ Here is an example for a collection, which uses:
 - [Dataview](https://blacksmithgu.github.io/obsidian-dataview/)
 - [Meta Bind](https://github.com/mProjectsCode/obsidian-meta-bind-plugin)
 - [Minimal Theme](https://github.com/kepano/obsidian-minimal)
+
+Alternatively use [Obsidian bases](https://help.obsidian.md/bases).
 
 Code:
 ````
