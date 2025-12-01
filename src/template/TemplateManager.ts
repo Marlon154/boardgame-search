@@ -1,7 +1,8 @@
 import * as nunjucks from 'nunjucks';
-import { moment, TFile } from 'obsidian';
+import { moment, TFile, normalizePath } from 'obsidian';
 import type BoardGamePlugin from '../main';
 import { DEFAULT_TEMPLATE } from '../constants';
+import { PersistExtension } from './PersistExtension';
 
 
 export class TemplateManager {
@@ -19,6 +20,7 @@ export class TemplateManager {
         });
         
         this.setupFilters();
+        this.setupExtensions();
     }
 
     private setupFilters(): void {
@@ -54,6 +56,43 @@ export class TemplateManager {
         });
     }
 
+    private setupExtensions(): void {
+        // Register persist extension (like Zotero Integration does)
+        this.env.addExtension('PersistExtension', new PersistExtension());
+    }
+
+    /**
+     * Extract persisted sections from an existing file
+     * Uses the same marker pattern as Zotero Integration: %% begin key %% ... %% end key %%
+     */
+    private async extractPersistedSections(filePath: string): Promise<Record<string, string>> {
+        const persistedSections: Record<string, string> = {};
+        
+        try {
+            const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
+            if (!file || !(file instanceof TFile)) {
+                return persistedSections;
+            }
+
+            const content = await this.plugin.app.vault.read(file);
+            
+            // Match persist blocks using Obsidian comment markers (like Zotero does)
+            // Pattern: %% begin key %%...content...%% end key %%
+            const persistRegex = /%% begin (\w+) %%([\s\S]*?)%% end \1 %%/g;
+            
+            let match;
+            while ((match = persistRegex.exec(content)) !== null) {
+                const key = match[1];
+                const value = match[2].trim();
+                persistedSections[key] = value;
+            }
+        } catch (error) {
+            console.error('Error extracting persisted sections:', error);
+        }
+
+        return persistedSections;
+    }
+
     public async loadAndRender(templatePath: string | null, context: any): Promise<string> {
         let template = DEFAULT_TEMPLATE;
         
@@ -70,6 +109,25 @@ export class TemplateManager {
                 console.error('Error loading template file:', error);
                 console.log('Falling back to default template');
             }
+        }
+
+        // Extract persisted sections from existing file if it exists
+        // This allows content in {% persist %} blocks to be preserved on re-import
+        try {
+            if (context.game && context.game.name) {
+                const fileName = context.game.name.replace(/[\\/:*?"<>|]/g, '-');
+                const folderPath = this.plugin.settings.folder || '';
+                const filePath = normalizePath(folderPath ? `${folderPath}/${fileName}.md` : `${fileName}.md`);
+                
+                const persistedSections = await this.extractPersistedSections(filePath);
+                
+                // Add persisted sections to context for the PersistExtension to use
+                context.persistedSections = persistedSections;
+            }
+        } catch (error) {
+            console.error('Error extracting persisted sections:', error);
+            // Continue with empty persisted sections
+            context.persistedSections = {};
         }
     
         try {
