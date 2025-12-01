@@ -367,7 +367,8 @@ export class BGGApiManager {
             const yearPublishedEl = item.getElementsByTagName('yearpublished')[0];
             const statisticsEl = item.getElementsByTagName('statistics')[0];
             const ratingEl = statisticsEl?.getElementsByTagName('average')[0];
-
+            const weight = item.getElementsByTagName('averageweight')[0];
+         
             // Parse polls
             const polls = item.getElementsByTagName('poll');
             let playerCountPoll;
@@ -413,6 +414,7 @@ export class BGGApiManager {
                 maxPlayTime: parseInt(maxPlayingTimeEl?.getAttribute('value') || '0'),
                 minAge: parseInt(minAgeEl?.getAttribute('value') || '0'),
                 rating: parseFloat(ratingEl?.getAttribute('value') || '0'),
+                weight: parseFloat(weight?.getAttribute('value') || '0'),
                 playerCountPoll: playerCountPoll || [],
                 suggestedPlayerCount,
                 playerAgePoll: playerAgePoll || { results: [], totalVotes: 0 },
