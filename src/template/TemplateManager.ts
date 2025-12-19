@@ -4,6 +4,7 @@ import type BoardGamePlugin from '../main';
 import { DEFAULT_TEMPLATE } from '../constants';
 import { PersistExtension } from './PersistExtension';
 
+const MARKDOWN_EXTENSION = '.md';
 
 export class TemplateManager {
     private env: nunjucks.Environment;
@@ -102,14 +103,14 @@ export class TemplateManager {
                 let abstractFile = this.plugin.app.vault.getAbstractFileByPath(templatePath);
                 
                 // If not found and path has .md extension, try without it
-                if (!abstractFile && templatePath.endsWith('.md')) {
-                    const pathWithoutExtension = templatePath.slice(0, -3);
+                if (!abstractFile && templatePath.endsWith(MARKDOWN_EXTENSION)) {
+                    const pathWithoutExtension = templatePath.replace(/\.md$/, '');
                     abstractFile = this.plugin.app.vault.getAbstractFileByPath(pathWithoutExtension);
                 }
                 
                 // If not found and path doesn't have .md extension, try with it
-                if (!abstractFile && !templatePath.endsWith('.md')) {
-                    const pathWithExtension = templatePath + '.md';
+                if (!abstractFile && !templatePath.endsWith(MARKDOWN_EXTENSION)) {
+                    const pathWithExtension = templatePath + MARKDOWN_EXTENSION;
                     abstractFile = this.plugin.app.vault.getAbstractFileByPath(pathWithExtension);
                 }
                 
