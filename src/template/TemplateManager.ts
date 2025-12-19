@@ -104,7 +104,7 @@ export class TemplateManager {
                 
                 // If not found and path has .md extension, try without it
                 if (!abstractFile && templatePath.endsWith(MARKDOWN_EXTENSION)) {
-                    const pathWithoutExtension = templatePath.replace(/\.md$/, '');
+                    const pathWithoutExtension = templatePath.substring(0, templatePath.length - MARKDOWN_EXTENSION.length);
                     abstractFile = this.plugin.app.vault.getAbstractFileByPath(pathWithoutExtension);
                 }
                 
