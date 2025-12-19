@@ -99,7 +99,20 @@ export class TemplateManager {
         // Only try to load custom template if path is provided
         if (templatePath && templatePath.trim().length > 0) {
             try {
-                const abstractFile = this.plugin.app.vault.getAbstractFileByPath(templatePath);
+                let abstractFile = this.plugin.app.vault.getAbstractFileByPath(templatePath);
+                
+                // If not found and path has .md extension, try without it
+                if (!abstractFile && templatePath.endsWith('.md')) {
+                    const pathWithoutExtension = templatePath.slice(0, -3);
+                    abstractFile = this.plugin.app.vault.getAbstractFileByPath(pathWithoutExtension);
+                }
+                
+                // If not found and path doesn't have .md extension, try with it
+                if (!abstractFile && !templatePath.endsWith('.md')) {
+                    const pathWithExtension = templatePath + '.md';
+                    abstractFile = this.plugin.app.vault.getAbstractFileByPath(pathWithExtension);
+                }
+                
                 if (abstractFile && abstractFile instanceof TFile) {
                     template = await this.plugin.app.vault.read(abstractFile);
                 } else {
