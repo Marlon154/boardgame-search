@@ -56,6 +56,8 @@ export interface BGGGameDetails {
     };
     playerAgePoll: PlayerAgePoll;
     languageDependencePoll: LanguageDependencePoll;
+    categories?: Array<string>;
+    mechanics?: Array<string>;
 }
 
 export interface RequestQueueItem {
@@ -368,6 +370,8 @@ export class BGGApiManager {
             const statisticsEl = item.getElementsByTagName('statistics')[0];
             const ratingEl = statisticsEl?.getElementsByTagName('average')[0];
             const weight = item.getElementsByTagName('averageweight')[0];
+            const categories = this.parseLinks(item, 'boardgamecategory');
+            const mechanics = this.parseLinks(item, 'boardgamemechanic');
          
             // Parse polls
             const polls = item.getElementsByTagName('poll');
@@ -418,7 +422,9 @@ export class BGGApiManager {
                 playerCountPoll: playerCountPoll || [],
                 suggestedPlayerCount,
                 playerAgePoll: playerAgePoll || { results: [], totalVotes: 0 },
-                languageDependencePoll: languageDependencePoll || { results: [], totalVotes: 0 }
+                languageDependencePoll: languageDependencePoll || { results: [], totalVotes: 0 },
+                categories,
+                mechanics
             };
         } catch (error) {
             console.error('Error fetching game details:', error);
@@ -429,5 +435,19 @@ export class BGGApiManager {
     // Helper method to handle XML API throttling
     private async wait(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Helper method to parse links of a specific type
+    private parseLinks(item: Element, linkType: string): Array<string> {
+        const links = item.querySelectorAll(`link[type="${linkType}"]`);
+        const results: Array<string> = [];
+        
+        links.forEach(link => {
+            const value = link.getAttribute('value');
+            if (value) {
+                results.push(value);
+            }
+        });
+        return results;
     }
 }
