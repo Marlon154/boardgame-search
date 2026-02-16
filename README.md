@@ -30,6 +30,7 @@ Track and manage your board game collection directly within Obsidian.
 - Search and import board games from [BoardGameGeek](https://boardgamegeek.com/) (BGG)
 - Automatically create game entries with detailed metadata
 - Download and save game cover images
+- Include game categories and mechanics in game details
 
 #### Image download quality
 
@@ -135,6 +136,8 @@ The following fields are available:
 | `game.minAge` | number | Minimum recommended age |
 | `game.rating` | number | BGG average rating (out of 10) |
 | `game.weight` | number | Game complexity rating |
+| `game.categories` | string[] | Array of game categories |
+| `game.mechanics` | string[] | Array of game mechanics |
 
 ### Suggested Player Count
 
@@ -199,6 +202,8 @@ The following fields are available:
 - **Play Time:** {{ game.playingTime | default('Unknown') }}{% if game.playingTime %} minutes{% endif %}
 - **Year Published:** {{ game.yearPublished | default('Unknown') }}
 - **BGG Rating:** {{ game.rating | number(1) | default('N/A') }}{% if game.rating %}/10{% endif %}
+- **Categories:** {% for category in game.categories %}#{{ category | replace(" ", "_") }}{% if not loop.last %}, {% endif %}{% endfor %}
+- **Mechanics:** {% for mechanic in game.mechanics %}#{{ mechanic | replace(" ", "_") }}{% if not loop.last %}, {% endif %}{% endfor %}
 
 ### Notes
 {% persist "notes" %}
@@ -216,6 +221,25 @@ Your persistent content here
 {% endpersist %}
 ```
 Inspired by [zotero integration](https://github.com/mgmeyers/obsidian-zotero-integration).
+
+### Array Templates
+
+The `categories` and `mechanics` fields are arrays that can be looped through using Nunjucks syntax:
+
+**Looping through arrays:**
+```markdown
+- **Categories:** {% for category in game.categories %}#{{ category | replace(" ", "_") }}{% if not loop.last %}, {% endif %}{% endfor %}
+- **Mechanics:** {% for mechanic in game.mechanics %}#{{ mechanic | replace(" ", "_") }}{% if not loop.last %}, {% endif %}{% endfor %}
+```
+
+**Template syntax explained:**
+- `{% for ... in ... %}` - Iterate through each item in the array
+- `#{{ category | replace(" ", "_") }}` - Format as hashtag and replace spaces with underscores
+- `{% if not loop.last %}, {% endif %}` - Add comma separator between items (but not after the last one)
+
+**Example output:**
+- **Categories:** #Strategy, #Family
+- **Mechanics:** #Worker_Placement, #Hand_Management
 
 ### Charts Support
 
