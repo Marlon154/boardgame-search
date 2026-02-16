@@ -161,6 +161,8 @@ export default class BoardGamePlugin extends Plugin {
             let imageReference = '';
             if (this.settings.enableImageSave) {
                 imageReference = await this.downloadAndSaveImage(gameDetails);
+            } else {
+                imageReference = gameDetails.image ?? '';
             }
     
             // Prepare template context
